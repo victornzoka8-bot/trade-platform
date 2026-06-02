@@ -395,17 +395,29 @@ function saveData() {
   }
   localStorage.setItem('pendingPayments', JSON.stringify(pendingPayments));
 }
+
+// ✅ FIXED: LOAD DATA — ALWAYS READ FRESH FROM STORAGE
 function loadData() {
   if(currentUser && !isAdmin) {
     try {
-      const d = JSON.parse(localStorage.getItem('userData_'+currentUser));
-      if(d) { 
-        balance = d.balance; 
-        stats = d.stats; 
-        history = d.history; 
-        accountType = d.accountType || 'demo'; 
+      const raw = localStorage.getItem('userData_'+currentUser);
+      if(raw) {
+        const d = JSON.parse(raw);
+        balance = d.balance;
+        stats = d.stats;
+        history = d.history;
+        accountType = d.accountType || 'demo';
+      } else {
+        // NEW USER: set default
+        balance = (accountType === 'demo') ? 10000 : 0;
+        stats = { wins:0, total:0, net:0, best:0 };
+        history = [];
       }
-    } catch(e) {}
+    } catch(e) {
+      balance = (accountType === 'demo') ? 10000 : 0;
+      stats = { wins:0, total:0, net:0, best:0 };
+      history = [];
+    }
   }
   try {
     const p = JSON.parse(localStorage.getItem('pendingPayments'));
@@ -413,20 +425,23 @@ function loadData() {
   } catch(e) {}
 }
 
-// ✅ NEW: CHECK BALANCE UPDATE LIVE
+// ✅ CHECK BALANCE UPDATE LIVE
 function checkBalanceUpdate() {
   if(!currentUser || isAdmin) return;
   try {
-    const fresh = JSON.parse(localStorage.getItem('userData_'+currentUser));
-    if(fresh && fresh.balance !== balance) {
+    const freshRaw = localStorage.getItem('userData_'+currentUser);
+    if(!freshRaw) return;
+    const fresh = JSON.parse(freshRaw);
+    
+    if(fresh.balance !== balance) {
       balance = fresh.balance;
       updateBalance();
-      showToast('✅ Balance updated!', 'win');
+      showToast('✅ Payment approved! Balance updated', 'win');
     }
   } catch(e) {}
 }
 
-// ✅ REGISTER & LOGIN — WORKING 100%
+// ✅ REGISTER & LOGIN — FIXED TO LOAD FRESH DATA
 function register() {
   const u = document.getElementById('username').value.trim();
   const p = document.getElementById('password').value.trim();
@@ -450,7 +465,7 @@ function login() {
   
   currentUser = u;
   isAdmin = false;
-  loadData();
+  loadData(); // ✅ LOAD FRESH DATA EVERY LOGIN
   
   document.getElementById('loginPage').className = 'container hidden';
   document.getElementById('accountPage').className = 'container visible';
@@ -490,14 +505,11 @@ function logout() {
 // --- ACCOUNT ---
 function selectAccount(type) {
   accountType = type;
-  if(type === 'demo') balance = 10000;
-  else balance = 0;
+  loadData(); // ✅ RELOAD FRESH DATA WHEN SWITCHING ACCOUNT
+  if(type === 'demo' && balance === 0) balance = 10000;
   
-  stats = { wins:0, total:0, net:0, best:0 };
-  history = [];
   selectedAmt = 0;
   selectedWithdrawAmt = 0;
-  saveData();
 
   document.getElementById('accountPage').className = 'container hidden';
   document.getElementById('tradePage').className = 'container visible';
@@ -516,12 +528,11 @@ function selectAccount(type) {
 
   document.getElementById('accTitle').textContent = type === 'demo' ? 'Demo Account' : 'Real Account';
 
-  // ✅ SHOW WITHDRAW ONLY IN REAL ACCOUNT
   document.getElementById('withdrawSection').className = type === 'real' ? '' : 'hidden';
 
   initChart();
   setInterval(updatePrice, 800);
-  setInterval(checkBalanceUpdate, 1500); // 🔑 CHECK EVERY 1.5 SECONDS
+  setInterval(checkBalanceUpdate, 1000); // CHECK EVERY SECOND
   updateStatsUI();
   updateHistoryUI();
 }
@@ -584,12 +595,10 @@ function requestWithdraw() {
   if(selectedWithdrawAmt < 100) return showToast('⚠️ Minimum withdraw 100 Ksh', 'lose');
   if(selectedWithdrawAmt > balance) return showToast('❌ Insufficient balance', 'lose');
 
-  // Deduct balance immediately
   balance -= selectedWithdrawAmt;
   updateBalance();
   saveData();
 
-  // Save withdraw request
   pendingPayments.push({
     id: Date.now(),
     user: currentUser,
@@ -600,7 +609,6 @@ function requestWithdraw() {
   });
   saveData();
 
-  // Show popup
   document.getElementById('withdrawAmtText').textContent = selectedWithdrawAmt;
   document.getElementById('withdrawPopup').style.display = 'flex';
 
@@ -644,17 +652,29 @@ function updateAdminPanel() {
   });
 }
 
+// ✅ FIXED APPROVE — SAVES CORRECTLY
 function approvePayment(id, user, amt) {
   const idx = pendingPayments.findIndex(x=>x.id===id);
   if(idx !== -1) pendingPayments[idx].status = 'approved';
   
-  // ✅ SAVE NEW BALANCE PERMANENTLY
   const userKey = 'userData_' + user;
-  const userData = JSON.parse(localStorage.getItem(userKey) || '{"balance":0}');
-  userData.balance += amt;
+  let userData;
+  
+  try {
+    const existing = localStorage.getItem(userKey);
+    userData = existing ? JSON.parse(existing) : { balance:0, stats:{wins:0,total:0,net:0,best:0}, history:[], accountType:'real' };
+  } catch(e) {
+    userData = { balance:0, stats:{wins:0,total:0,net:0,best:0}, history:[], accountType:'real' };
+  }
+
+  // ADD AMOUNT TO BALANCE
+  userData.balance = Number(userData.balance) + Number(amt);
+  
+  // SAVE PERMANENTLY
   localStorage.setItem(userKey, JSON.stringify(userData));
   
-  saveData(); updateAdminPanel();
+  saveData(); 
+  updateAdminPanel();
   showToast(`✅ Approved ${amt} Ksh for ${user}`, 'win');
 }
 
@@ -665,7 +685,7 @@ function rejectPayment(id) {
   showToast('❌ Payment rejected', 'lose');
 }
 
-// --- PRICE & REAL CANDLESTICKS ---
+// --- PRICE & CHART ---
 function changePair() {
   const sel = document.getElementById('pairSelect').value;
   const names = { EURUSD:'EUR/USD', GBPUSD:'GBP/USD', USDJPY:'USD/JPY', AUDUSD:'AUD/USD' };
@@ -826,7 +846,6 @@ function finishTrade() {
   history.unshift({time: new Date().toLocaleTimeString(), pair: document.getElementById('pairName').textContent, win, profit});
   if(history.length>20) history.pop();
 
-  // Show pro result popup
   showResultPopup(win, profit, document.getElementById('pairName').textContent, tradeDuration);
 
   updateBalance(); updateStatsUI(); updateHistoryUI(); saveData();

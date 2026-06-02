@@ -413,6 +413,19 @@ function loadData() {
   } catch(e) {}
 }
 
+// ✅ NEW: CHECK BALANCE UPDATE LIVE
+function checkBalanceUpdate() {
+  if(!currentUser || isAdmin) return;
+  try {
+    const fresh = JSON.parse(localStorage.getItem('userData_'+currentUser));
+    if(fresh && fresh.balance !== balance) {
+      balance = fresh.balance;
+      updateBalance();
+      showToast('✅ Balance updated!', 'win');
+    }
+  } catch(e) {}
+}
+
 // ✅ REGISTER & LOGIN — WORKING 100%
 function register() {
   const u = document.getElementById('username').value.trim();
@@ -508,6 +521,7 @@ function selectAccount(type) {
 
   initChart();
   setInterval(updatePrice, 800);
+  setInterval(checkBalanceUpdate, 1500); // 🔑 CHECK EVERY 1.5 SECONDS
   updateStatsUI();
   updateHistoryUI();
 }
@@ -633,9 +647,13 @@ function updateAdminPanel() {
 function approvePayment(id, user, amt) {
   const idx = pendingPayments.findIndex(x=>x.id===id);
   if(idx !== -1) pendingPayments[idx].status = 'approved';
-  const userData = JSON.parse(localStorage.getItem('userData_'+user) || '{"balance":0}');
+  
+  // ✅ SAVE NEW BALANCE PERMANENTLY
+  const userKey = 'userData_' + user;
+  const userData = JSON.parse(localStorage.getItem(userKey) || '{"balance":0}');
   userData.balance += amt;
-  localStorage.setItem('userData_'+user, JSON.stringify(userData));
+  localStorage.setItem(userKey, JSON.stringify(userData));
+  
   saveData(); updateAdminPanel();
   showToast(`✅ Approved ${amt} Ksh for ${user}`, 'win');
 }

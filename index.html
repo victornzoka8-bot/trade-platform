@@ -104,8 +104,8 @@ td { padding: 8px; border-bottom: 1px solid var(--border); }
 .result-popup.lose .popup-content { border-color: #ef4444; background: linear-gradient(180deg, #33181f, #2b1218); }
 
 .result-popup .icon { font-size: 64px; margin-bottom: 12px; }
-.result-popup.win .icon { color: #22c55e; content: "✅"; }
-.result-popup.lose .icon { color: #ef4444; content: "❌"; }
+.result-popup.win .icon { color: #22c55e; }
+.result-popup.lose .icon { color: #ef4444; }
 
 .result-popup h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
 .result-popup.win h2 { color: #22c55e; }
@@ -188,7 +188,7 @@ hr { margin:15px 0; border: none; border-top:1px solid var(--border); }
     </button>
     <button class="btn-real" onclick="selectAccount('real')" style="margin-top:10px;">
       <h3>💼 Real Account <span style="background:#000; color:#fff; font-size:10px; padding:2px 6px; border-radius:6px;">LIVE</span></h3>
-      <p style="font-size:13px; opacity:0.9; margin-top:4px;">Balance: 0 Ksh (Real Funds)</p>
+      <p style="font-size:13px; opacity:0.9; margin-top:4px;">Balance: <span id="realBalanceText">0</span> Ksh (Real Funds)</p>
     </button>
     <button class="btn-gray" onclick="logout()" style="margin-top:20px;">Logout</button>
   </div>
@@ -225,7 +225,7 @@ hr { margin:15px 0; border: none; border-top:1px solid var(--border); }
 
     <div class="price-row">
       <span id="pairName">EUR/USD</span>
-      <span id="price">1.1273</span>
+      <span id="price">1.1268</span>
     </div>
 
     <div id="timer" class="timer">Ready</div>
@@ -290,7 +290,7 @@ hr { margin:15px 0; border: none; border-top:1px solid var(--border); }
       <p id="depositNote" style="font-size:11px; text-align:center; margin-top:6px; color:#f59e0b;">⚠️ Balance updates ONLY after payment is approved</p>
     </div>
 
-    <!-- ✅ WITHDRAW SECTION — ONLY VISIBLE IN REAL ACCOUNT -->
+    <!-- WITHDRAW SECTION -->
     <div id="withdrawSection" class="hidden" style="margin-top:20px; border-top:1px dashed #252d4d; padding-top:20px;">
       <h4>💸 Withdraw Funds</h4>
       <p style="font-size:12px; color:#94a3b8; text-align:center; margin-bottom:10px;">Min: 100 Ksh • Sent to your M-Pesa</p>
@@ -368,7 +368,7 @@ let currentUser = null;
 let isAdmin = false;
 let accountType = 'demo';
 let balance = 10000;
-let price = 1.1273;
+let price = 1.1268;
 let tradeDuration = 60;
 let activeTrade = null;
 let chartCtx, chartCanvas;
@@ -396,19 +396,18 @@ function saveData() {
   localStorage.setItem('pendingPayments', JSON.stringify(pendingPayments));
 }
 
-// ✅ FIXED: LOAD DATA — ALWAYS READ FRESH FROM STORAGE
+// ✅ LOAD FRESH DATA EVERY TIME
 function loadData() {
   if(currentUser && !isAdmin) {
     try {
       const raw = localStorage.getItem('userData_'+currentUser);
       if(raw) {
         const d = JSON.parse(raw);
-        balance = d.balance;
-        stats = d.stats;
-        history = d.history;
+        balance = Number(d.balance) || 0;
+        stats = d.stats || { wins:0, total:0, net:0, best:0 };
+        history = d.history || [];
         accountType = d.accountType || 'demo';
       } else {
-        // NEW USER: set default
         balance = (accountType === 'demo') ? 10000 : 0;
         stats = { wins:0, total:0, net:0, best:0 };
         history = [];
@@ -425,7 +424,7 @@ function loadData() {
   } catch(e) {}
 }
 
-// ✅ CHECK BALANCE UPDATE LIVE
+// ✅ LIVE BALANCE UPDATE
 function checkBalanceUpdate() {
   if(!currentUser || isAdmin) return;
   try {
@@ -433,15 +432,16 @@ function checkBalanceUpdate() {
     if(!freshRaw) return;
     const fresh = JSON.parse(freshRaw);
     
-    if(fresh.balance !== balance) {
-      balance = fresh.balance;
+    if(Number(fresh.balance) !== Number(balance)) {
+      balance = Number(fresh.balance);
       updateBalance();
+      updateRealBalanceText();
       showToast('✅ Payment approved! Balance updated', 'win');
     }
   } catch(e) {}
 }
 
-// ✅ REGISTER & LOGIN — FIXED TO LOAD FRESH DATA
+// --- AUTHENTICATION ---
 function register() {
   const u = document.getElementById('username').value.trim();
   const p = document.getElementById('password').value.trim();
@@ -465,12 +465,22 @@ function login() {
   
   currentUser = u;
   isAdmin = false;
-  loadData(); // ✅ LOAD FRESH DATA EVERY LOGIN
+  loadData();
   
   document.getElementById('loginPage').className = 'container hidden';
   document.getElementById('accountPage').className = 'container visible';
   document.getElementById('userName').textContent = u;
+  updateRealBalanceText();
   showToast('✅ Welcome, '+u, 'win');
+}
+
+function updateRealBalanceText() {
+  if(currentUser) {
+    try {
+      const d = JSON.parse(localStorage.getItem('userData_'+currentUser) || '{}');
+      document.getElementById('realBalanceText').textContent = Number(d.balance) || 0;
+    } catch(e) {}
+  }
 }
 
 function adminLogin() {
@@ -505,7 +515,7 @@ function logout() {
 // --- ACCOUNT ---
 function selectAccount(type) {
   accountType = type;
-  loadData(); // ✅ RELOAD FRESH DATA WHEN SWITCHING ACCOUNT
+  loadData();
   if(type === 'demo' && balance === 0) balance = 10000;
   
   selectedAmt = 0;
@@ -527,12 +537,11 @@ function selectAccount(type) {
   updateBalance();
 
   document.getElementById('accTitle').textContent = type === 'demo' ? 'Demo Account' : 'Real Account';
-
   document.getElementById('withdrawSection').className = type === 'real' ? '' : 'hidden';
 
   initChart();
   setInterval(updatePrice, 800);
-  setInterval(checkBalanceUpdate, 1000); // CHECK EVERY SECOND
+  setInterval(checkBalanceUpdate, 1000);
   updateStatsUI();
   updateHistoryUI();
 }
@@ -540,6 +549,7 @@ function selectAccount(type) {
 function backToAccounts() {
   document.getElementById('tradePage').className = 'container hidden';
   document.getElementById('accountPage').className = 'container visible';
+  updateRealBalanceText();
 }
 
 // --- AMOUNT SELECT ---
@@ -556,7 +566,7 @@ function selectWithdraw(amt) {
   document.getElementById('withdrawAmount').value = amt + ' Ksh';
 }
 
-// --- DEPOSIT REQUEST ---
+// --- DEPOSIT ---
 function requestDeposit() {
   if(selectedAmt < 50) return showToast('⚠️ Select amount first', 'lose');
   if(accountType === 'demo') {
@@ -590,7 +600,7 @@ function requestDeposit() {
   document.getElementById('depositAmount').value = '0 Ksh';
 }
 
-// --- ✅ WITHDRAW REQUEST ---
+// --- WITHDRAW ---
 function requestWithdraw() {
   if(selectedWithdrawAmt < 100) return showToast('⚠️ Minimum withdraw 100 Ksh', 'lose');
   if(selectedWithdrawAmt > balance) return showToast('❌ Insufficient balance', 'lose');
@@ -622,7 +632,7 @@ function closeWithdrawPopup() {
   document.getElementById('withdrawPopup').style.display = 'none';
 }
 
-// --- ADMIN ---
+// --- ADMIN PANEL ---
 function updateAdminPanel() {
   const list = document.getElementById('pendingList');
   const pending = pendingPayments.filter(p=>p.status==='pending');
@@ -652,7 +662,7 @@ function updateAdminPanel() {
   });
 }
 
-// ✅ FIXED APPROVE — SAVES CORRECTLY
+// ✅ CORE FIX: APPROVE & UPDATE BALANCE DIRECTLY
 function approvePayment(id, user, amt) {
   const idx = pendingPayments.findIndex(x=>x.id===id);
   if(idx !== -1) pendingPayments[idx].status = 'approved';
@@ -667,15 +677,15 @@ function approvePayment(id, user, amt) {
     userData = { balance:0, stats:{wins:0,total:0,net:0,best:0}, history:[], accountType:'real' };
   }
 
-  // ADD AMOUNT TO BALANCE
+  // ✅ ADD AMOUNT TO BALANCE — WORKS FOR 100, 500, 1000, ANY
   userData.balance = Number(userData.balance) + Number(amt);
   
-  // SAVE PERMANENTLY
+  // ✅ SAVE PERMANENTLY
   localStorage.setItem(userKey, JSON.stringify(userData));
   
   saveData(); 
   updateAdminPanel();
-  showToast(`✅ Approved ${amt} Ksh for ${user}`, 'win');
+  showToast(`✅ Approved ${amt} Ksh for ${user} — Balance updated!`, 'win');
 }
 
 function rejectPayment(id) {
@@ -689,7 +699,7 @@ function rejectPayment(id) {
 function changePair() {
   const sel = document.getElementById('pairSelect').value;
   const names = { EURUSD:'EUR/USD', GBPUSD:'GBP/USD', USDJPY:'USD/JPY', AUDUSD:'AUD/USD' };
-  const starts = { EURUSD:1.1273, GBPUSD:1.2845, USDJPY:149.22, AUDUSD:0.6712 };
+  const starts = { EURUSD:1.1268, GBPUSD:1.2845, USDJPY:149.22, AUDUSD:0.6712 };
   price = starts[sel];
   document.getElementById('pairName').textContent = names[sel];
   candles = [];
@@ -872,7 +882,7 @@ function closeResultPopup() {
 
 // --- UPDATE UI ---
 function updateBalance() {
-  document.getElementById('balanceDisplay').textContent = balance.toFixed(0) + ' Ksh';
+  document.getElementById('balanceDisplay').textContent = Number(balance).toFixed(0) + ' Ksh';
 }
 function updateStatsUI() {
   const wr = stats.total ? Math.round(stats.wins / stats.total * 100) : 0;
@@ -899,7 +909,7 @@ function closePopup() {
   document.getElementById('popup').style.display = 'none';
 }
 
-// ✅ BIND BUTTONS
+// ✅ BIND ALL BUTTONS — FIXED NOT RESPONDING ISSUE
 window.onload = () => {
   loadData();
   document.getElementById('registerBtn').addEventListener('click', register);

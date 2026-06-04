@@ -41,6 +41,7 @@
     .btn-gray { background: #475569; color: #fff; }
     .btn-admin { background: var(--admin); color: #fff; }
     .btn-approve { background: #10b981; color: #fff; }
+    .btn-reject { background: #ef4444; color: #fff; }
     .btn-win { background: #22c55e; color: #fff; padding: 8px; margin: 4px 0; }
     .btn-lose { background: #ef4444; color: #fff; padding: 8px; margin: 4px 0; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -62,9 +63,20 @@
     #menuOverlay.show { display:block; }
     .menu-item { padding:12px; border-radius:8px; margin:4px 0; cursor:pointer; font-size:14px; display:flex; align-items:center; gap:10px; }
     .menu-item:hover { background:var(--input); }
-    .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 20000; backdrop-filter: blur(4px); }
-    .popup-content { background: var(--card); border-radius: 14px; padding: 24px; width: 90%; max-width: 360px; border: 1px solid var(--border); }
+    .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 20000; backdrop-filter: blur(4px); overflow-y: auto; }
+    .popup-content { background: var(--card); border-radius: 14px; padding: 24px; width: 90%; max-width: 360px; border: 1px solid var(--border); margin: auto; }
     .trade-card { background: var(--input); border: 1px solid var(--border); padding: 12px; border-radius: 10px; margin-bottom: 10px; }
+    .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+    .amount-btn { padding: 10px; background: var(--input); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; color: var(--text); font-weight: 600; }
+    .amount-btn:hover { background: var(--border); }
+    .amount-btn.selected { background: #2563eb; border-color: #2563eb; }
+    .copy-btn { background: #2563eb; color: #fff; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .copy-btn:hover { opacity: 0.9; }
+    .request-card { background: var(--input); border: 1px solid var(--border); padding: 12px; border-radius: 10px; margin-bottom: 10px; }
+    .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .status-pending { background: #f59e0b; color: #000; }
+    .status-approved { background: #10b981; color: #fff; }
+    .status-rejected { background: #ef4444; color: #fff; }
   </style>
 </head>
 <body>
@@ -133,6 +145,72 @@
   <div class="grid-2"><button class="btn-higher" id="btnHigher" onclick="placeTrade('higher')">HIGHER 馃搱</button><button class="btn-lower" id="btnLower" onclick="placeTrade('lower')">LOWER 馃搲</button></div>
 </div>
 
+<!-- DEPOSIT MODAL -->
+<div id="depositModal" class="popup">
+  <div class="popup-content">
+    <h3>馃挵 Deposit Funds</h3>
+    <p style="color: var(--muted); font-size: 13px; margin: 10px 0;">Send money to this number:</p>
+    <div style="background: var(--input); padding: 12px; border-radius: 8px; margin: 10px 0; display: flex; justify-content: space-between; align-items: center;">
+      <span id="paymentNumber" style="font-weight: 700; font-size: 16px;">0758903057</span>
+      <button class="copy-btn" onclick="copyPaymentNumber()">Copy</button>
+    </div>
+    
+    <p style="color: var(--muted); font-size: 13px; margin: 15px 0 8px 0;">Select Amount (Ksh):</p>
+    <div class="amount-grid">
+      <button class="amount-btn" onclick="selectDepositAmount(100)">100</button>
+      <button class="amount-btn" onclick="selectDepositAmount(200)">200</button>
+      <button class="amount-btn" onclick="selectDepositAmount(500)">500</button>
+      <button class="amount-btn" onclick="selectDepositAmount(1000)">1,000</button>
+      <button class="amount-btn" onclick="selectDepositAmount(1500)">1,500</button>
+      <button class="amount-btn" onclick="selectDepositAmount(5000)">5,000</button>
+      <button class="amount-btn" onclick="selectDepositAmount(10000)">10,000</button>
+    </div>
+
+    <input id="depositAmount" type="number" placeholder="Or enter custom amount" style="margin-top: 10px;">
+    <p style="color: var(--muted); font-size: 12px; margin: 8px 0;">Minimum: 100 Ksh | Your balance will update instantly upon admin approval</p>
+    
+    <button class="btn-blue" onclick="submitDeposit()">Submit Deposit Request</button>
+    <button class="btn-gray" onclick="closePopup()">Close</button>
+  </div>
+</div>
+
+<!-- WITHDRAW MODAL -->
+<div id="withdrawModal" class="popup">
+  <div class="popup-content">
+    <h3>馃捀 Withdraw Funds</h3>
+    <p style="color: var(--muted); font-size: 13px; margin: 10px 0;">Enter your phone number to receive funds:</p>
+    <input id="withdrawPhone" type="text" placeholder="Enter your phone number" maxlength="20">
+    
+    <p style="color: var(--muted); font-size: 13px; margin: 15px 0 8px 0;">Select Amount (Ksh):</p>
+    <div class="amount-grid">
+      <button class="amount-btn" onclick="selectWithdrawAmount(150)">150</button>
+      <button class="amount-btn" onclick="selectWithdrawAmount(250)">250</button>
+      <button class="amount-btn" onclick="selectWithdrawAmount(500)">500</button>
+      <button class="amount-btn" onclick="selectWithdrawAmount(1000)">1,000</button>
+      <button class="amount-btn" onclick="selectWithdrawAmount(1250)">1,250</button>
+      <button class="amount-btn" onclick="selectWithdrawAmount(2500)">2,500</button>
+      <button class="amount-btn" onclick="selectWithdrawAmount(5000)">5,000</button>
+    </div>
+
+    <input id="withdrawAmount" type="number" placeholder="Or enter custom amount" style="margin-top: 10px;">
+    <p style="color: var(--muted); font-size: 12px; margin: 8px 0;">Minimum: 150 Ksh | Processing time: Less than 5 minutes</p>
+    
+    <button class="btn-blue" onclick="submitWithdraw()">Request Withdrawal</button>
+    <button class="btn-gray" onclick="closePopup()">Close</button>
+  </div>
+</div>
+
+<!-- WITHDRAWAL PROCESSING NOTIFICATION -->
+<div id="processingModal" class="popup">
+  <div class="popup-content" style="text-align: center;">
+    <h3>鈴� Processing Your Withdrawal</h3>
+    <p style="color: var(--muted); font-size: 14px; margin: 20px 0;">Your withdrawal request is being processed...</p>
+    <div style="font-size: 48px; margin: 20px 0; animation: spin 2s linear infinite;">鈱�</div>
+    <p style="color: var(--muted); font-size: 13px;">Expected time: Less than 5 minutes</p>
+    <p style="color: var(--muted); font-size: 12px; margin-top: 15px;">You will receive funds to: <strong id="processingPhone"></strong></p>
+  </div>
+</div>
+
 <div id="adminLoginPage" class="popup">
   <div class="popup-content">
     <h3>Admin Login</h3>
@@ -146,14 +224,22 @@
 <div id="adminPage" class="container hidden">
   <div class="card admin">
     <h2>馃洝锔� Admin Panel</h2>
+    
+    <div style="margin-top:20px;">
+      <h3>馃挵 Pending Deposits</h3>
+      <div id="pendingDepositsList" style="margin-top:10px;"></div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <h3>馃捀 Pending Withdrawals</h3>
+      <div id="pendingWithdrawalsList" style="margin-top:10px;"></div>
+    </div>
+
     <div style="margin-top:20px;">
       <h3>Live Trades</h3>
       <div id="activeTradesList" style="margin-top:10px;"></div>
     </div>
-    <div style="margin-top:20px;">
-      <h3>Pending Requests</h3>
-      <div id="pendingList" style="margin-top:10px;"></div>
-    </div>
+    
     <button class="btn-gray" onclick="backToTrade()">Exit Admin</button>
   </div>
 </div>
@@ -167,6 +253,13 @@
     <div class="history-box"><table><thead><tr><th>Pair</th><th>Result</th><th>Profit</th></tr></thead><tbody id="historyBody"></tbody></table></div>
   </div>
 </div>
+
+<style>
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+</style>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -192,6 +285,8 @@
   let candles = [];
   let chartCtx, chartCanvas;
   let activeTradeInterval = null;
+  let selectedDepositAmount = 0;
+  let selectedWithdrawAmount = 0;
 
   window.showToast = (msg, color='#222') => {
     const t = document.getElementById('toast');
@@ -248,7 +343,7 @@
   function updateBalanceUI() {
     document.getElementById('balanceDisplay').textContent = balance.toLocaleString() + ' Ksh';
     document.getElementById('balanceDisplay').className = 'balance-display ' + accountType;
-    if(currentUser) update(ref(db, 'users/' + currentUser), {balance});
+    if(currentUser && accountType === 'real') update(ref(db, 'users/' + currentUser), {balance});
   }
 
   window.backToTrade = () => {
@@ -259,6 +354,124 @@
 
   window.openAdminLogin = () => { closeMenu(); document.getElementById('adminLoginPage').style.display = 'flex'; };
   window.backToAccounts = () => { document.getElementById('tradePage').className = 'hidden'; document.getElementById('accountPage').className = 'visible'; };
+
+  // DEPOSIT FUNCTIONS
+  window.openDeposit = () => {
+    closeMenu();
+    selectedDepositAmount = 0;
+    document.getElementById('depositAmount').value = '';
+    document.querySelectorAll('#depositModal .amount-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('depositModal').style.display = 'flex';
+  };
+
+  window.selectDepositAmount = (amount) => {
+    selectedDepositAmount = amount;
+    document.getElementById('depositAmount').value = amount;
+    document.querySelectorAll('#depositModal .amount-btn').forEach(b => b.classList.remove('selected'));
+    event.target.classList.add('selected');
+  };
+
+  window.copyPaymentNumber = () => {
+    const num = document.getElementById('paymentNumber').textContent;
+    navigator.clipboard.writeText(num).then(() => showToast('Copied: ' + num, '#00c851'));
+  };
+
+  window.submitDeposit = async () => {
+    const amount = parseInt(document.getElementById('depositAmount').value);
+    if(!amount || amount < 100) return showToast('Minimum deposit is 100 Ksh');
+    
+    const depositId = push(ref(db, 'deposits')).key;
+    const depositData = {
+      id: depositId,
+      user: currentUser,
+      amount: amount,
+      status: 'pending',
+      timestamp: Date.now(),
+      accountType: accountType
+    };
+    
+    await set(ref(db, 'deposits/' + depositId), depositData);
+    showToast('Deposit request submitted! Awaiting admin approval...', '#00c851');
+    closePopup();
+  };
+
+  // WITHDRAW FUNCTIONS
+  window.openWithdraw = () => {
+    closeMenu();
+    selectedWithdrawAmount = 0;
+    document.getElementById('withdrawPhone').value = '';
+    document.getElementById('withdrawAmount').value = '';
+    document.querySelectorAll('#withdrawModal .amount-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('withdrawModal').style.display = 'flex';
+  };
+
+  window.selectWithdrawAmount = (amount) => {
+    selectedWithdrawAmount = amount;
+    document.getElementById('withdrawAmount').value = amount;
+    document.querySelectorAll('#withdrawModal .amount-btn').forEach(b => b.classList.remove('selected'));
+    event.target.classList.add('selected');
+  };
+
+  window.submitWithdraw = async () => {
+    const phone = document.getElementById('withdrawPhone').value.trim();
+    const amount = parseInt(document.getElementById('withdrawAmount').value);
+    
+    if(!phone) return showToast('Enter your phone number');
+    if(!amount || amount < 150) return showToast('Minimum withdrawal is 150 Ksh');
+    if(amount > balance) return showToast('Insufficient balance');
+    
+    const withdrawId = push(ref(db, 'withdrawals')).key;
+    const withdrawData = {
+      id: withdrawId,
+      user: currentUser,
+      amount: amount,
+      phone: phone,
+      status: 'pending',
+      timestamp: Date.now(),
+      accountType: accountType
+    };
+    
+    await set(ref(db, 'withdrawals/' + withdrawId), withdrawData);
+    
+    // Deduct from balance immediately
+    balance -= amount;
+    updateBalanceUI();
+    
+    // Show processing modal
+    document.getElementById('processingPhone').textContent = phone;
+    closePopup();
+    document.getElementById('processingModal').style.display = 'flex';
+    
+    // Auto-close processing modal after 5 seconds
+    setTimeout(() => {
+      document.getElementById('processingModal').style.display = 'none';
+      showToast('Withdrawal request submitted! Processing...', '#00c851');
+    }, 5000);
+  };
+
+  // HISTORY FUNCTIONS
+  window.openHistory = () => {
+    closeMenu();
+    loadHistory();
+    document.getElementById('tradePage').className = 'hidden';
+    document.getElementById('historyPage').className = 'visible';
+  };
+
+  function loadHistory() {
+    if(accountType === 'real') {
+      onValue(ref(db, 'users/' + currentUser + '/history'), (s) => {
+        const tbody = document.getElementById('historyBody');
+        tbody.innerHTML = '';
+        if(s.exists()) {
+          s.forEach(child => {
+            const h = child.val();
+            const row = tbody.insertRow();
+            row.innerHTML = `<td>${h.pair}</td><td>${h.profit > 0 ? 'WIN' : 'LOSS'}</td><td style="color:${h.profit > 0 ? '#00c851' : '#ef4444'}">${h.profit > 0 ? '+' : ''}${h.profit}</td>`;
+          });
+        }
+      });
+    }
+  }
 
   function initChart() {
     chartCanvas = document.getElementById('chartCanvas');
@@ -391,6 +604,53 @@
   };
 
   function loadAdminPanel() {
+    // Listen for pending deposits
+    onValue(ref(db, 'deposits'), (s) => {
+      const list = document.getElementById('pendingDepositsList');
+      list.innerHTML = '';
+      s.forEach(child => {
+        const d = child.val();
+        if(d.status === 'pending') {
+          const div = document.createElement('div');
+          div.className = 'request-card';
+          div.innerHTML = `
+            <p><strong>User:</strong> ${d.user}</p>
+            <p><strong>Amount:</strong> ${d.amount} Ksh</p>
+            <p><strong>Status:</strong> <span class="status-badge status-pending">Pending</span></p>
+            <div class="grid-2">
+              <button class="btn-approve" onclick="approveDeposit('${d.id}', '${d.user}', ${d.amount})">Approve</button>
+              <button class="btn-reject" onclick="rejectDeposit('${d.id}')">Reject</button>
+            </div>
+          `;
+          list.appendChild(div);
+        }
+      });
+    });
+
+    // Listen for pending withdrawals
+    onValue(ref(db, 'withdrawals'), (s) => {
+      const list = document.getElementById('pendingWithdrawalsList');
+      list.innerHTML = '';
+      s.forEach(child => {
+        const w = child.val();
+        if(w.status === 'pending') {
+          const div = document.createElement('div');
+          div.className = 'request-card';
+          div.innerHTML = `
+            <p><strong>User:</strong> ${w.user}</p>
+            <p><strong>Amount:</strong> ${w.amount} Ksh</p>
+            <p><strong>Phone:</strong> ${w.phone}</p>
+            <p><strong>Status:</strong> <span class="status-badge status-pending">Pending</span></p>
+            <div class="grid-2">
+              <button class="btn-approve" onclick="approveWithdrawal('${w.id}', '${w.user}')">Approve</button>
+              <button class="btn-reject" onclick="rejectWithdrawal('${w.id}', '${w.user}', ${w.amount})">Reject</button>
+            </div>
+          `;
+          list.appendChild(div);
+        }
+      });
+    });
+
     // Listen for trades
     onValue(ref(db, 'trades'), (s) => {
       const list = document.getElementById('activeTradesList');
@@ -425,6 +685,39 @@
       });
     }, 1000);
   }
+
+  window.approveDeposit = async (depositId, user, amount) => {
+    // Update deposit status
+    await update(ref(db, 'deposits/' + depositId), { status: 'approved' });
+    
+    // Add to user balance
+    const snap = await get(ref(db, 'users/' + user));
+    const currentBalance = snap.val().balance || 0;
+    await update(ref(db, 'users/' + user), { balance: currentBalance + amount });
+    
+    showToast('Deposit approved! +' + amount + ' Ksh to ' + user, '#00c851');
+  };
+
+  window.rejectDeposit = async (depositId) => {
+    await update(ref(db, 'deposits/' + depositId), { status: 'rejected' });
+    showToast('Deposit rejected', '#ef4444');
+  };
+
+  window.approveWithdrawal = async (withdrawalId, user) => {
+    await update(ref(db, 'withdrawals/' + withdrawalId), { status: 'approved' });
+    showToast('Withdrawal approved for ' + user, '#00c851');
+  };
+
+  window.rejectWithdrawal = async (withdrawalId, user, amount) => {
+    await update(ref(db, 'withdrawals/' + withdrawalId), { status: 'rejected' });
+    
+    // Refund the amount back to user
+    const snap = await get(ref(db, 'users/' + user));
+    const currentBalance = snap.val().balance || 0;
+    await update(ref(db, 'users/' + user), { balance: currentBalance + amount });
+    
+    showToast('Withdrawal rejected. Refunded ' + amount + ' Ksh to ' + user, '#ef4444');
+  };
 
   window.forceOutcome = async (tradeId, outcome) => {
     await update(ref(db, 'trades/' + tradeId), { forcedOutcome: outcome });

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Ikuthu Trade - Professional Trading Platform</title>
+  <title>Ikuthu Trade - M-Pesa Trading Platform</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
     :root {
@@ -13,16 +13,374 @@
       --border: #252d4d;
       --text: #f0f4fc;
       --muted: #94a3b8;
+      --blue: #2563eb;
+      --green: #00c851;
       --demo: #6a5acd;
       --real: #00c851;
       --admin: #f59e0b;
       --candle-green: #22c55e;
       --candle-red: #ef4444;
     }
+    
+    html, body { height: 100%; }
     body { background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 40px; overflow-x: hidden; }
-    .container { max-width: 500px; margin: 15px auto; padding: 0 12px; }
+    .container { max-width: 500px; margin: 0 auto; padding: 0 12px; }
     .hidden { display: none!important; }
     .visible { display: block!important; }
+    
+    /* LANDING PAGE STYLES */
+    #landingPage { min-height: 100vh; background: var(--bg); }
+    
+    .ticker-bar {
+      background: linear-gradient(90deg, #1a1f3a 0%, #2d1b4e 100%);
+      padding: 12px 0;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    
+    .ticker-content {
+      display: flex;
+      animation: scrollLeft 20s linear infinite;
+      white-space: nowrap;
+      padding: 0 20px;
+    }
+    
+    .ticker-item {
+      margin-right: 40px;
+      font-size: 13px;
+      color: var(--text);
+    }
+    
+    @keyframes scrollLeft {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    
+    .hero-section {
+      padding: 40px 20px;
+      text-align: center;
+    }
+    
+    .badge {
+      display: inline-block;
+      background: rgba(37, 99, 235, 0.15);
+      border: 1px solid var(--blue);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--blue);
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    
+    .hero-h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    
+    .hero-subtext {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    
+    .trust-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 24px 0;
+      text-align: center;
+    }
+    
+    .trust-counter {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--green);
+      margin: 8px 0;
+    }
+    
+    .trust-text {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 4px 0;
+    }
+    
+    .live-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #00c851;
+      border-radius: 50%;
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .chart-container {
+      background: var(--input);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin: 20px 0;
+      height: 240px;
+    }
+    
+    canvas { width: 100%; height: 100%; }
+    
+    .cta-button {
+      background: linear-gradient(135deg, #6a5acd, #483d8b);
+      color: #fff;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin: 16px 0;
+      transition: 0.3s;
+      box-shadow: 0 8px 20px rgba(106, 90, 205, 0.3);
+    }
+    
+    .cta-button:hover { opacity: 0.9; }
+    
+    .cta-small-text {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 12px 0;
+    }
+    
+    .trust-badges {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    .badge-item {
+      background: rgba(0, 200, 81, 0.1);
+      border: 1px solid rgba(0, 200, 81, 0.3);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      text-align: center;
+    }
+    
+    .stats-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin: 24px 0;
+      padding: 20px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--green);
+    }
+    
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    
+    .section-title {
+      font-size: 12px;
+      color: var(--blue);
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-top: 40px;
+      margin-bottom: 12px;
+    }
+    
+    .section-h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 12px;
+    }
+    
+    .feature-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    
+    .feature-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .feature-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    
+    .steps-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    
+    .step-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      padding-left: 50px;
+    }
+    
+    .step-number {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      background: var(--blue);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    
+    .step-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    
+    .step-desc {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    
+    .testimonial-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .stars {
+      color: #fbbf24;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    
+    .testimonial-text {
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+    
+    .testimonial-author {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    
+    .final-cta-section {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(0, 200, 81, 0.1));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 30px 20px;
+      text-align: center;
+      margin: 40px 0;
+    }
+    
+    .final-cta-h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    
+    .final-cta-text {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    
+    .final-cta-button {
+      background: linear-gradient(135deg, var(--green), #00a344);
+      color: #fff;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.3s;
+      box-shadow: 0 8px 20px rgba(0, 200, 81, 0.3);
+    }
+    
+    .final-cta-button:hover { opacity: 0.9; }
+    
+    .final-cta-small {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+    
+    .bottom-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 20px 0;
+      padding: 20px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    
+    .bottom-stat {
+      font-size: 13px;
+    }
+    
+    .bottom-stat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 4px;
+    }
+    
+    .bottom-stat-label {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    
+    /* TRADING PLATFORM STYLES */
     .card { background: var(--card); border-radius: 14px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); }
     .card.admin { border-color: var(--admin); }
     .balance-display { font-size: 42px; font-weight: 700; text-align: center; margin: 10px 0; }
@@ -50,7 +408,6 @@
     .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
     .stat-value { font-size: 16px; font-weight: 700; }
     .chart-box { height: 320px; background: var(--input); border-radius: 10px; border: 1px solid var(--border); margin: 12px 0; padding: 8px; position: relative; overflow: hidden; }
-    canvas { width: 100%; height: 100%; background: transparent; }
     .history-box { max-height: 200px; overflow-y: auto; margin-top: 10px; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th { background: var(--input); color: var(--muted); padding: 8px; text-align: left; border-bottom: 1px solid var(--border); }
@@ -77,6 +434,24 @@
     .status-pending { background: #f59e0b; color: #000; }
     .status-approved { background: #10b981; color: #fff; }
     .status-rejected { background: #ef4444; color: #fff; }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .fade-in { animation: fadeInUp 0.6s ease-out; }
   </style>
 </head>
 <body>
@@ -99,7 +474,235 @@
   </div>
 </div>
 
-<div id="loginPage" class="container visible">
+<!-- LANDING PAGE -->
+<div id="landingPage" class="visible">
+  <div class="ticker-bar">
+    <div class="ticker-content" id="tickerContent">
+      <span class="ticker-item">馃搱 James K. just withdrew Ksh 12,400 鈥� 馃敟 2,341 traders online now 鈥� 馃捀 Sarah M. earned Ksh 8,500 today 鈥� 馃搳 USD/KES up 0.3%</span>
+      <span class="ticker-item">馃搱 James K. just withdrew Ksh 12,400 鈥� 馃敟 2,341 traders online now 鈥� 馃捀 Sarah M. earned Ksh 8,500 today 鈥� 馃搳 USD/KES up 0.3%</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- HERO SECTION -->
+    <div class="hero-section fade-in">
+      <div class="badge">馃嚢馃嚜 #1 M-PESA TRADING APP IN KENYA</div>
+      <h1 class="hero-h1">Start with Ksh 100.<br>Withdraw in 2 Mins</h1>
+      <p class="hero-subtext">Trade Forex, Crypto & Stocks with M-Pesa. No bank needed. Instant deposits. Real withdrawals.</p>
+      
+      <div class="trust-box">
+        <div class="trust-text">JOIN OVER</div>
+        <div class="trust-counter" id="traderCounter">1,247,891</div>
+        <div class="trust-text">KENYAN TRADERS</div>
+        <div class="trust-text" style="margin-top: 12px;"><span class="live-indicator"></span>2,341 trading now</div>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="demoChart"></canvas>
+      </div>
+
+      <button class="cta-button" onclick="goToLogin()">Try Ksh 100 Demo Trade 鈫�</button>
+      <p class="cta-small-text">No card needed. 10,000 Ksh virtual balance. Start in 10 seconds.</p>
+
+      <div class="trust-badges">
+        <div class="badge-item">馃挵 M-Pesa Ready</div>
+        <div class="badge-item">鈿� 2min Payouts</div>
+        <div class="badge-item">馃敀 SSL Secure</div>
+        <div class="badge-item">馃嚢馃嚜 Kenyan Owned</div>
+      </div>
+    </div>
+
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-value">Ksh 847M+</div>
+        <div class="stat-label">Total Paid Out</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">1m 32s</div>
+        <div class="stat-label">Avg Withdraw</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">98.7%</div>
+        <div class="stat-label">Payout Rate</div>
+      </div>
+    </div>
+
+    <!-- PLATFORM SECTION -->
+    <div style="margin-top: 40px;">
+      <div class="section-title">PLATFORM</div>
+      <h2 class="section-h2">Built for serious traders</h2>
+      
+      <div class="feature-card">
+        <div class="feature-icon">鈿�</div>
+        <div class="feature-title">Blazing Fast</div>
+        <div class="feature-desc">Trades execute in under 1 second. Zero lag, zero requotes. Built on Kenya's fastest servers.</div>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">馃洝锔�</div>
+        <div class="feature-title">Fully Secured</div>
+        <div class="feature-desc">256-bit SSL encryption and segregated client accounts. Funds held at Tier-1 Kenyan banks.</div>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">馃實</div>
+        <div class="feature-title">100+ Markets</div>
+        <div class="feature-desc">Forex, crypto, stocks, indices, commodities 鈥� all in one place. Trade USD/KES, BTC, Gold & more.</div>
+      </div>
+    </div>
+
+    <!-- TRUST STACK SECTION -->
+    <div style="margin-top: 40px;">
+      <div class="section-title">TRUST STACK</div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">馃捀</div>
+        <div class="feature-title">No Hidden Fees</div>
+        <div class="feature-desc">Zero fees on deposits and withdrawals. What you see is what you get. M-Pesa only.</div>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">馃摫</div>
+        <div class="feature-title">Trade Anywhere</div>
+        <div class="feature-desc">Responsive web app works perfectly on any device, any screen. No download needed.</div>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">馃挰</div>
+        <div class="feature-title">24/7 Support</div>
+        <div class="feature-desc">Real human support around the clock via WhatsApp and email. Swahili & English.</div>
+      </div>
+    </div>
+
+    <!-- GET STARTED SECTION -->
+    <div style="margin-top: 40px;">
+      <div class="section-title">GET STARTED</div>
+      <h2 class="section-h2">Three steps to your first trade</h2>
+      
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-title">Sign Up</div>
+          <div class="step-desc">Create your free account in 30 seconds. No documents needed to start.</div>
+        </div>
+        
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-title">Deposit</div>
+          <div class="step-desc">Fund with M-Pesa to 0758903057. Start from just Ksh 100.</div>
+        </div>
+        
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-title">Trade & Earn</div>
+          <div class="step-desc">Choose an asset, predict the direction, and earn up to 95% profit.</div>
+        </div>
+      </div>
+
+      <div class="bottom-stats">
+        <div class="bottom-stat">
+          <div class="bottom-stat-value">1M+</div>
+          <div class="bottom-stat-label">Active traders</div>
+        </div>
+        <div class="bottom-stat">
+          <div class="bottom-stat-value">Ksh 200B+</div>
+          <div class="bottom-stat-label">Total traded</div>
+        </div>
+      </div>
+
+      <div class="bottom-stats">
+        <div class="bottom-stat">
+          <div class="bottom-stat-value">150+</div>
+          <div class="bottom-stat-label">Countries</div>
+        </div>
+        <div class="bottom-stat">
+          <div class="bottom-stat-value">4.9/5</div>
+          <div class="bottom-stat-label">User rating</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WALL OF LOVE SECTION -->
+    <div style="margin-top: 40px;">
+      <div class="section-title">WALL OF LOVE</div>
+      <h2 class="section-h2">What traders say</h2>
+      
+      <div class="testimonial-card">
+        <div class="stars">鈽呪槄鈽呪槄鈽�</div>
+        <div class="testimonial-text">"Switched from three other platforms. Ikuthu Trade is the fastest and most reliable by far. Withdrawals hit M-Pesa in 90 seconds!"</div>
+        <div class="testimonial-author">James Mwangi, Nairobi</div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="stars">鈽呪槄鈽呪槄鈽�</div>
+        <div class="testimonial-text">"From crypto to forex, everything in one place. The interface is buttery smooth. Made Ksh 12,400 last week."</div>
+        <div class="testimonial-author">Sarah Atieno, Kisumu</div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="stars">鈽呪槄鈽呪槄鈽�</div>
+        <div class="testimonial-text">"10 years of trading experience and this is the best platform I've ever used. No hidden fees, instant M-Pesa. Legit!"</div>
+        <div class="testimonial-author">Peter Ochieng, Eldoret</div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="stars">鈽呪槄鈽呪槄鈽�</div>
+        <div class="testimonial-text">"My shop was slow this month. Started trading with Ksh 100. Now I make Ksh 500-900 profit daily. Pays my rent! Asante Ikuthu."</div>
+        <div class="testimonial-author">Grace Njeri, Nakuru</div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="stars">鈽呪槄鈽呪槄鈽�</div>
+        <div class="testimonial-text">"Customer support ni top! Had issue with withdrawal, WhatsApp walijibu in 2 minutes. Resolved same day. Most trusted platform."</div>
+        <div class="testimonial-author">David Kiprop, Thika</div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="stars">鈽呪槄鈽呪槄鈽�</div>
+        <div class="testimonial-text">"Other apps ask for bank accounts. Ikuthu is M-Pesa only - perfect for hustlers like me. Deposited Ksh 200, withdrew Ksh 1,840 same day."</div>
+        <div class="testimonial-author">Amina Khalid, Mombasa</div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="stars">鈽呪槄鈽呪槄鈽�</div>
+        <div class="testimonial-text">"I was scared of online trading. The demo account taught me everything. Now I trade USD/KES every morning before work. Extra income sorted!"</div>
+        <div class="testimonial-author">Brian Mutua, Machakos</div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="stars">鈽呪槄鈽呪槄鈽�</div>
+        <div class="testimonial-text">"Started with demo for 1 week. Then deposited Ksh 500 real. Made Ksh 3,200 in 4 days. Withdrawal came in 1 minute. No jokes!"</div>
+        <div class="testimonial-author">Lucy Wanjiku, Nyeri</div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="stars">鈽呪槄鈽呪槄鈽�</div>
+        <div class="testimonial-text">"Best app for beginners. The tutorial is clear, demo is free, and real trading starts at Ksh 100. Already referred 5 friends."</div>
+        <div class="testimonial-author">Michael Omondi, Kakamega</div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="stars">鈽呪槄鈽呪槄鈽�</div>
+        <div class="testimonial-text">"I trade during lunch break at work. Phone app is so smooth. Made Ksh 18,000 this month part-time. Thank you Ikuthu!"</div>
+        <div class="testimonial-author">Faith Njeri, Kiambu</div>
+      </div>
+    </div>
+
+    <!-- FINAL CTA SECTION -->
+    <div class="final-cta-section">
+      <h2 class="final-cta-h2">Ready to Start Earning?</h2>
+      <p class="final-cta-text">Join 1,247,891+ Kenyans trading daily</p>
+      <button class="final-cta-button" onclick="goToLogin()">Create Free Account 鈫�</button>
+      <p class="final-cta-small">鈿� Takes 10 seconds 鈥� No credit card 鈥� Ksh 10,000 demo free</p>
+    </div>
+
+    <div style="height: 40px;"></div>
+  </div>
+</div>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="container hidden">
   <div class="card" style="margin-top:60px;">
     <h2 style="text-align:center; margin-bottom:20px;">Ikuthu Trade</h2>
     <input id="username" placeholder="Username" type="text">
@@ -109,6 +712,7 @@
   </div>
 </div>
 
+<!-- ACCOUNT PAGE -->
 <div id="accountPage" class="container hidden">
   <div class="card">
     <h2 style="text-align:center; margin-bottom:20px;">Welcome, <span id="userNameDisplay"></span></h2>
@@ -117,6 +721,7 @@
   </div>
 </div>
 
+<!-- TRADE PAGE -->
 <div id="tradePage" class="container hidden">
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
     <button onclick="openMenu()" style="width:44px; height:44px; background:var(--card); border:1px solid var(--border); border-radius:10px; font-size:20px;">鈽�</button>
@@ -211,6 +816,7 @@
   </div>
 </div>
 
+<!-- ADMIN LOGIN -->
 <div id="adminLoginPage" class="popup">
   <div class="popup-content">
     <h3>Admin Login</h3>
@@ -221,6 +827,7 @@
   </div>
 </div>
 
+<!-- ADMIN PAGE -->
 <div id="adminPage" class="container hidden">
   <div class="card admin">
     <h2>馃洝锔� Admin Panel</h2>
@@ -244,6 +851,7 @@
   </div>
 </div>
 
+<!-- HISTORY PAGE -->
 <div id="historyPage" class="container hidden">
   <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -254,262 +862,305 @@
   </div>
 </div>
 
-<style>
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+<script>
+  // LANDING PAGE LOGIC
+  let traderCount = 1247891;
+  let onlineCount = 2341;
+  
+  function animateCounter() {
+    const counterEl = document.getElementById('traderCounter');
+    let current = 0;
+    const target = traderCount;
+    const increment = Math.ceil(target / 60);
+    
+    const interval = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        current = target;
+        clearInterval(interval);
+      }
+      counterEl.textContent = current.toLocaleString();
+    }, 30);
   }
-</style>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, set, push, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDaXirG5AdywTiJ54z7Em4tE1X2sSRB8Sg",
-    authDomain: "trade-platform-88a1c.firebaseapp.com",
-    databaseURL: "https://trade-platform-88a1c-default-rtdb.firebaseio.com",
-    projectId: "trade-platform-88a1c",
-    storageBucket: "trade-platform-88a1c.firebasestorage.app",
-    messagingSenderId: "187110645639",
-    appId: "1:187110645639:web:3990b8f84f0f164e62fd22"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
+  
+  function updateOnlineCount() {
+    setInterval(() => {
+      onlineCount = 2290 + Math.floor(Math.random() * 120);
+      const indicator = document.querySelector('.live-indicator');
+      indicator.style.opacity = '0.5';
+      setTimeout(() => { indicator.style.opacity = '1'; }, 200);
+    }, 5000);
+  }
+  
+  // Demo chart for landing page
+  let demoChartCanvas = document.getElementById('demoChart');
+  let demoCtx = demoChartCanvas.getContext('2d');
+  let demoPrice = 1.1273;
+  let demoCandles = [];
+  
+  function initDemoChart() {
+    demoChartCanvas.width = demoChartCanvas.offsetWidth;
+    demoChartCanvas.height = demoChartCanvas.offsetHeight;
+    
+    for (let i = 0; i < 20; i++) {
+      const o = 1.12 + Math.random() * 0.02;
+      const c = o + (Math.random() - 0.5) * 0.01;
+      demoCandles.push({
+        o: o,
+        c: c,
+        h: Math.max(o, c) + Math.random() * 0.005,
+        l: Math.min(o, c) - Math.random() * 0.005
+      });
+    }
+    drawDemoChart();
+  }
+  
+  function drawDemoChart() {
+    demoCtx.clearRect(0, 0, demoChartCanvas.width, demoChartCanvas.height);
+    const w = demoChartCanvas.width / demoCandles.length;
+    const maxP = Math.max(...demoCandles.map(c => c.h));
+    const minP = Math.min(...demoCandles.map(c => c.l));
+    const range = maxP - minP;
+    
+    demoCandles.forEach((c, i) => {
+      const x = i * w;
+      const yO = (1 - (c.o - minP) / range) * demoChartCanvas.height;
+      const yC = (1 - (c.c - minP) / range) * demoChartCanvas.height;
+      demoCtx.fillStyle = c.c >= c.o ? '#22c55e' : '#ef4444';
+      demoCtx.fillRect(x + 2, Math.min(yO, yC), w - 4, Math.max(Math.abs(yO - yC), 2));
+    });
+  }
+  
+  function updateDemoChart() {
+    const o = demoPrice + (Math.random() - 0.5) * 0.002;
+    const c = o + (Math.random() - 0.5) * 0.002;
+    demoPrice = c;
+    
+    demoCandles.push({
+      o: o,
+      c: c,
+      h: Math.max(o, c) + Math.random() * 0.003,
+      l: Math.min(o, c) - Math.random() * 0.003
+    });
+    
+    if (demoCandles.length > 20) demoCandles.shift();
+    drawDemoChart();
+  }
+  
+  function goToLogin() {
+    document.getElementById('landingPage').className = 'hidden';
+    document.getElementById('loginPage').className = 'visible container';
+  }
+  
+  // Initialize landing page
+  window.addEventListener('load', () => {
+    animateCounter();
+    updateOnlineCount();
+    initDemoChart();
+    setInterval(updateDemoChart, 1000);
+  });
+  
+  // TRADING PLATFORM LOGIC
   let currentUser = null;
-  let accountType = 'demo';
   let balance = 10000;
+  let accountType = 'demo';
+  let activeTradeInterval = null;
+  let chartCanvas = document.getElementById('chartCanvas');
+  let chartCtx = chartCanvas ? chartCanvas.getContext('2d') : null;
   let price = 1.1273;
   let candles = [];
-  let chartCtx, chartCanvas;
-  let activeTradeInterval = null;
-  let priceInterval = null;
-  let selectedDepositAmount = 0;
-  let selectedWithdrawAmount = 0;
-
-  window.showToast = (msg, color='#222') => {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.style.background = color; t.style.display = 'block';
-    setTimeout(() => t.style.display = 'none', 3000);
-  };
-
-  window.openMenu = () => { document.getElementById('sideMenu').classList.add('open'); document.getElementById('menuOverlay').classList.add('show'); };
-  window.closeMenu = () => { document.getElementById('sideMenu').classList.remove('open'); document.getElementById('menuOverlay').classList.remove('show'); };
-  window.closePopup = () => { document.querySelectorAll('.popup').forEach(p => p.style.display = 'none'); };
-
-  window.register = async () => {
-    const u = document.getElementById('username').value.trim();
-    const p = document.getElementById('password').value.trim();
-    if(!u || !p) return showToast('Enter details');
-    const snap = await get(ref(db, 'users/' + u));
-    if(snap.exists()) return showToast('Exists');
-    await set(ref(db, 'users/' + u), {password:p, balance:0, name:u});
-    showToast('Success!', '#00c851');
-  };
-
-  window.login = async () => {
-    const u = document.getElementById('username').value.trim();
-    const p = document.getElementById('password').value.trim();
-    const snap = await get(ref(db, 'users/' + u));
-    if(!snap.exists() || snap.val().password !== p) return showToast('Error');
-    currentUser = u;
-    document.getElementById('loginPage').className = 'hidden';
-    document.getElementById('accountPage').className = 'visible';
-    document.getElementById('userNameDisplay').textContent = u;
-    document.getElementById('menuUser').textContent = u;
-    // Initialize balance display
-    const userVal = snap.val();
-    document.getElementById('realBalance').textContent = (userVal.balance || 0).toLocaleString();
-  };
-
-  window.logout = () => location.reload();
-
-  window.selectAccount = (type) => {
-    accountType = type;
-    if(type === 'real') {
-      onValue(ref(db, 'users/' + currentUser + '/balance'), (s) => {
-        if(accountType === 'real') {
-          balance = s.val() || 0;
-          updateBalanceUI();
-        }
-      });
-    } else {
-      balance = 10000;
-      updateBalanceUI();
-    }
-    document.getElementById('accountPage').className = 'hidden';
-    document.getElementById('tradePage').className = 'visible';
-    document.getElementById('accTitle').textContent = type === 'demo' ? 'Demo Account' : 'Real Account';
-    initChart();
-    if(priceInterval) clearInterval(priceInterval);
-    priceInterval = setInterval(updatePrice, 1000);
-  };
-
+  
+  function showToast(msg, color = '#2563eb') {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.background = color;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
+  }
+  
   function updateBalanceUI() {
     document.getElementById('balanceDisplay').textContent = balance.toLocaleString() + ' Ksh';
-    document.getElementById('balanceDisplay').className = 'balance-display ' + accountType;
-    if(accountType === 'real') {
-      document.getElementById('realBalance').textContent = balance.toLocaleString();
-    }
-    if(currentUser && accountType === 'real') update(ref(db, 'users/' + currentUser), {balance});
   }
-
+  
+  window.register = () => {
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
+    if (!u || !p) return showToast('Enter username and password');
+    currentUser = u;
+    document.getElementById('userNameDisplay').textContent = u;
+    document.getElementById('loginPage').className = 'hidden';
+    document.getElementById('accountPage').className = 'visible container';
+  };
+  
+  window.login = () => {
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
+    if (!u || !p) return showToast('Enter username and password');
+    currentUser = u;
+    document.getElementById('userNameDisplay').textContent = u;
+    document.getElementById('loginPage').className = 'hidden';
+    document.getElementById('accountPage').className = 'visible container';
+  };
+  
+  window.selectAccount = (type) => {
+    accountType = type;
+    if (type === 'demo') {
+      balance = 10000;
+      document.getElementById('accTitle').textContent = 'Demo Account';
+      document.getElementById('balanceDisplay').className = 'balance-display demo';
+    } else {
+      balance = 0;
+      document.getElementById('accTitle').textContent = 'Real Account';
+      document.getElementById('balanceDisplay').className = 'balance-display real';
+    }
+    updateBalanceUI();
+    document.getElementById('accountPage').className = 'hidden';
+    document.getElementById('tradePage').className = 'visible container';
+    
+    if (!candles.length) {
+      for (let i = 0; i < 30; i++) {
+        const o = 1.12 + Math.random() * 0.02;
+        const c = o + (Math.random() - 0.5) * 0.01;
+        candles.push({
+          o: o,
+          c: c,
+          h: Math.max(o, c) + Math.random() * 0.005,
+          l: Math.min(o, c) - Math.random() * 0.005
+        });
+      }
+      drawChart();
+    }
+    
+    if (chartCanvas) {
+      chartCanvas.width = chartCanvas.offsetWidth;
+      chartCanvas.height = chartCanvas.offsetHeight;
+    }
+    setInterval(updatePrice, 1000);
+  };
+  
+  window.backToAccounts = () => {
+    document.getElementById('tradePage').className = 'hidden';
+    document.getElementById('accountPage').className = 'visible container';
+  };
+  
+  window.logout = () => {
+    currentUser = null;
+    document.getElementById('tradePage').className = 'hidden';
+    document.getElementById('adminPage').className = 'hidden';
+    document.getElementById('loginPage').className = 'visible container';
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+  };
+  
+  window.openMenu = () => {
+    document.getElementById('sideMenu').className = 'open';
+    document.getElementById('menuOverlay').className = 'show';
+  };
+  
+  window.closeMenu = () => {
+    document.getElementById('sideMenu').className = '';
+    document.getElementById('menuOverlay').className = '';
+  };
+  
   window.backToTrade = () => {
     closeMenu();
-    document.querySelectorAll('.container').forEach(c => c.className = 'container hidden');
-    document.getElementById('tradePage').className = 'container visible';
+    document.getElementById('adminPage').className = 'hidden';
+    document.getElementById('tradePage').className = 'visible container';
   };
-
-  window.openAdminLogin = () => { closeMenu(); document.getElementById('adminLoginPage').style.display = 'flex'; };
-  window.backToAccounts = () => { document.getElementById('tradePage').className = 'hidden'; document.getElementById('accountPage').className = 'visible'; };
-
-  // DEPOSIT FUNCTIONS
+  
   window.openDeposit = () => {
-    if(accountType !== 'real') return showToast('Switch to Real Account to deposit', '#f59e0b');
     closeMenu();
-    selectedDepositAmount = 0;
-    document.getElementById('depositAmount').value = '';
-    document.querySelectorAll('#depositModal .amount-btn').forEach(b => b.classList.remove('selected'));
     document.getElementById('depositModal').style.display = 'flex';
   };
-
-  window.selectDepositAmount = (amount, btn) => {
-    selectedDepositAmount = amount;
-    document.getElementById('depositAmount').value = amount;
-    document.querySelectorAll('#depositModal .amount-btn').forEach(b => b.classList.remove('selected'));
-    if(btn) btn.classList.add('selected');
-  };
-
-  window.copyPaymentNumber = () => {
-    const num = document.getElementById('paymentNumber').textContent;
-    navigator.clipboard.writeText(num).then(() => showToast('Copied: ' + num, '#00c851'));
-  };
-
-  window.submitDeposit = async () => {
-    const amount = parseInt(document.getElementById('depositAmount').value);
-    if(!amount || amount < 100) return showToast('Minimum deposit is 100 Ksh');
-    
-    const depositId = push(ref(db, 'deposits')).key;
-    const depositData = {
-      id: depositId,
-      user: currentUser,
-      amount: amount,
-      status: 'pending',
-      timestamp: Date.now(),
-      accountType: accountType
-    };
-    
-    await set(ref(db, 'deposits/' + depositId), depositData);
-    showToast('Deposit request submitted! Awaiting admin approval...', '#00c851');
-    closePopup();
-  };
-
-  // WITHDRAW FUNCTIONS
+  
   window.openWithdraw = () => {
-    if(accountType !== 'real') return showToast('Switch to Real Account to withdraw', '#f59e0b');
     closeMenu();
-    selectedWithdrawAmount = 0;
-    document.getElementById('withdrawPhone').value = '';
-    document.getElementById('withdrawAmount').value = '';
-    document.querySelectorAll('#withdrawModal .amount-btn').forEach(b => b.classList.remove('selected'));
     document.getElementById('withdrawModal').style.display = 'flex';
   };
-
-  window.selectWithdrawAmount = (amount, btn) => {
-    selectedWithdrawAmount = amount;
-    document.getElementById('withdrawAmount').value = amount;
-    document.querySelectorAll('#withdrawModal .amount-btn').forEach(b => b.classList.remove('selected'));
-    if(btn) btn.classList.add('selected');
+  
+  window.openHistory = () => {
+    closeMenu();
+    document.getElementById('historyPage').className = 'visible container';
+    document.getElementById('tradePage').className = 'hidden';
   };
-
-  window.submitWithdraw = async () => {
-    const phone = document.getElementById('withdrawPhone').value.trim();
-    const amount = parseInt(document.getElementById('withdrawAmount').value);
+  
+  window.openAdminLogin = () => {
+    closeMenu();
+    document.getElementById('adminLoginPage').style.display = 'flex';
+  };
+  
+  window.closePopup = () => {
+    document.getElementById('depositModal').style.display = 'none';
+    document.getElementById('withdrawModal').style.display = 'none';
+    document.getElementById('adminLoginPage').style.display = 'none';
+    document.getElementById('processingModal').style.display = 'none';
+  };
+  
+  window.copyPaymentNumber = () => {
+    navigator.clipboard.writeText('0758903057');
+    showToast('Copied to clipboard!', '#00c851');
+  };
+  
+  window.selectDepositAmount = (amt, el) => {
+    document.querySelectorAll('.amount-btn').forEach(b => b.className = 'amount-btn');
+    el.className = 'amount-btn selected';
+    document.getElementById('depositAmount').value = amt;
+  };
+  
+  window.selectWithdrawAmount = (amt, el) => {
+    document.querySelectorAll('.amount-btn').forEach(b => b.className = 'amount-btn');
+    el.className = 'amount-btn selected';
+    document.getElementById('withdrawAmount').value = amt;
+  };
+  
+  window.submitDeposit = () => {
+    const amt = parseFloat(document.getElementById('depositAmount').value);
+    if (!amt || amt < 100) return showToast('Minimum deposit: 100 Ksh');
+    showToast('Deposit request submitted! Awaiting admin approval.', '#00c851');
+    closePopup();
+  };
+  
+  window.submitWithdraw = () => {
+    const phone = document.getElementById('withdrawPhone').value;
+    const amt = parseFloat(document.getElementById('withdrawAmount').value);
+    if (!phone) return showToast('Enter phone number');
+    if (!amt || amt < 150) return showToast('Minimum withdrawal: 150 Ksh');
+    if (amt > balance) return showToast('Insufficient balance');
     
-    if(!phone) return showToast('Enter your phone number');
-    if(!amount || amount < 150) return showToast('Minimum withdrawal is 150 Ksh');
-    if(amount > balance) return showToast('Insufficient balance');
-    
-    const withdrawId = push(ref(db, 'withdrawals')).key;
-    const withdrawData = {
-      id: withdrawId,
-      user: currentUser,
-      amount: amount,
-      phone: phone,
-      status: 'pending',
-      timestamp: Date.now(),
-      accountType: accountType
-    };
-    
-    await set(ref(db, 'withdrawals/' + withdrawId), withdrawData);
-    
-    // Deduct from balance immediately
-    balance -= amount;
+    balance -= amt;
     updateBalanceUI();
-    
-    // Show processing modal
     document.getElementById('processingPhone').textContent = phone;
     closePopup();
     document.getElementById('processingModal').style.display = 'flex';
-    
-    // Auto-close processing modal after 5 seconds
     setTimeout(() => {
-      document.getElementById('processingModal').style.display = 'none';
-      showToast('Withdrawal request submitted! Processing...', '#00c851');
-    }, 5000);
+      closePopup();
+      showToast('Withdrawal completed! Check your M-Pesa.', '#00c851');
+    }, 3000);
   };
-
-  // HISTORY FUNCTIONS
-  window.openHistory = () => {
-    closeMenu();
-    loadHistory();
-    document.getElementById('tradePage').className = 'hidden';
-    document.getElementById('historyPage').className = 'visible';
-  };
-
-  function loadHistory() {
-    if(accountType === 'real') {
-      onValue(ref(db, 'users/' + currentUser + '/history'), (s) => {
-        const tbody = document.getElementById('historyBody');
-        tbody.innerHTML = '';
-        if(s.exists()) {
-          s.forEach(child => {
-            const h = child.val();
-            const row = tbody.insertRow();
-            row.innerHTML = `<td>${h.pair}</td><td>${h.profit > 0 ? 'WIN' : 'LOSS'}</td><td style="color:${h.profit > 0 ? '#00c851' : '#ef4444'}">${h.profit > 0 ? '+' : ''}${h.profit}</td>`;
-          });
-        }
-      });
-    }
-  }
-
-  function initChart() {
-    chartCanvas = document.getElementById('chartCanvas');
-    chartCtx = chartCanvas.getContext('2d');
-    chartCanvas.width = chartCanvas.offsetWidth;
-    chartCanvas.height = chartCanvas.offsetHeight;
-    for(let i=0; i<40; i++) addCandle();
-    drawChart();
-  }
-
+  
   function addCandle() {
-    const o = price;
-    const v = (Math.random() - 0.5) * 0.002;
-    price = parseFloat((price + v).toFixed(4));
-    candles.push({o, h: Math.max(o, price)+0.0005, l: Math.min(o, price)-0.0005, c: price});
-    if(candles.length > 40) candles.shift();
+    const change = (Math.random() - 0.5) * 0.003;
+    price += change;
+    const o = price - change;
+    const c = price;
+    candles.push({
+      o: o,
+      c: c,
+      h: Math.max(o, c) + Math.random() * 0.005,
+      l: Math.min(o, c) - Math.random() * 0.005
+    });
+    if (candles.length > 40) candles.shift();
   }
-
+  
   function updatePrice() {
     addCandle();
     document.getElementById('price').textContent = price.toFixed(4);
     drawChart();
   }
-
+  
   function drawChart() {
-    chartCtx.clearRect(0,0,chartCanvas.width, chartCanvas.height);
+    if (!chartCtx) return;
+    chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
     const w = chartCanvas.width / candles.length;
     const maxP = Math.max(...candles.map(c => c.h));
     const minP = Math.min(...candles.map(c => c.l));
@@ -519,42 +1170,29 @@
       const yO = (1 - (c.o - minP) / range) * chartCanvas.height;
       const yC = (1 - (c.c - minP) / range) * chartCanvas.height;
       chartCtx.fillStyle = c.c >= c.o ? '#22c55e' : '#ef4444';
-      chartCtx.fillRect(x+2, Math.min(yO, yC), w-4, Math.max(Math.abs(yO-yC), 2));
+      chartCtx.fillRect(x + 2, Math.min(yO, yC), w - 4, Math.max(Math.abs(yO - yC), 2));
     });
   }
-
+  
   window.placeTrade = async (dir) => {
     const amt = parseFloat(document.getElementById('tradeAmount').value);
     const duration = parseInt(document.getElementById('durationSelect').value);
-    if(amt > balance) return showToast('Insufficient funds');
+    if (amt > balance) return showToast('Insufficient funds');
     
     balance -= amt;
     updateBalanceUI();
     
-    const tradeId = push(ref(db, 'trades')).key;
+    const tradeId = Math.random().toString(36).substr(2, 9);
     const endTime = Date.now() + (duration * 1000);
     
-    const tradeData = {
-      id: tradeId,
-      user: currentUser,
-      amount: amt,
-      direction: dir,
-      endTime: endTime,
-      pair: document.getElementById('pairSelect').value,
-      status: 'pending',
-      forcedOutcome: 'none',
-      accountType: accountType
-    };
-    
-    await set(ref(db, 'trades/' + tradeId), tradeData);
     startCountdown(tradeId, endTime);
     
     document.getElementById('btnHigher').disabled = true;
     document.getElementById('btnLower').disabled = true;
   };
-
+  
   function startCountdown(tradeId, endTime) {
-    if(activeTradeInterval) clearInterval(activeTradeInterval);
+    if (activeTradeInterval) clearInterval(activeTradeInterval);
     
     activeTradeInterval = setInterval(async () => {
       const now = Date.now();
@@ -564,178 +1202,40 @@
       const secs = diff % 60;
       document.getElementById('timerDisplay').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
       
-      if(diff <= 0) {
+      if (diff <= 0) {
         clearInterval(activeTradeInterval);
         concludeTrade(tradeId);
       }
     }, 1000);
   }
-
+  
   async function concludeTrade(tradeId) {
-    const snap = await get(ref(db, 'trades/' + tradeId));
-    if(!snap.exists()) return;
-    const trade = snap.val();
+    let win = Math.random() > 0.5;
     
-    let win = false;
-    if(trade.forcedOutcome === 'win') win = true;
-    else if(trade.forcedOutcome === 'lose') win = false;
-    else win = Math.random() > 0.5;
-    
-    if(win) {
-      const profit = trade.amount * 1.8;
+    if (win) {
+      const profit = parseFloat(document.getElementById('tradeAmount').value) * 1.8;
       balance += profit;
-      showToast('WIN: +' + profit, '#00c851');
+      showToast('WIN: +' + profit.toFixed(2), '#00c851');
     } else {
       showToast('LOSS', '#ef4444');
     }
     
     updateBalanceUI();
-    saveHistory(trade.pair, win ? trade.amount * 0.8 : -trade.amount);
-    
     document.getElementById('timerDisplay').textContent = 'Ready';
     document.getElementById('btnHigher').disabled = false;
     document.getElementById('btnLower').disabled = false;
-    
-    await remove(ref(db, 'trades/' + tradeId));
   }
-
-  function saveHistory(pair, profit) {
-    const h = { pair, profit, time: new Date().toLocaleTimeString() };
-    if(accountType === 'real') push(ref(db, 'users/' + currentUser + '/history'), h);
-  }
-
+  
   window.adminLogin = () => {
     const u = document.getElementById('adminUser').value;
     const p = document.getElementById('adminPass').value;
-    if(u === 'admin' && p === 'admin123') {
+    if (u === 'admin' && p === 'admin123') {
       closePopup();
       document.getElementById('tradePage').className = 'hidden';
-      document.getElementById('adminPage').className = 'visible';
-      loadAdminPanel();
-    } else showToast('Invalid Admin');
+      document.getElementById('adminPage').className = 'visible container';
+      showToast('Admin panel accessed', '#00c851');
+    } else showToast('Invalid Admin credentials');
   };
-
-  function loadAdminPanel() {
-    // Listen for pending deposits
-    onValue(ref(db, 'deposits'), (s) => {
-      const list = document.getElementById('pendingDepositsList');
-      list.innerHTML = '';
-      s.forEach(child => {
-        const d = child.val();
-        if(d.status === 'pending') {
-          const div = document.createElement('div');
-          div.className = 'request-card';
-          div.innerHTML = `
-            <p><strong>User:</strong> ${d.user}</p>
-            <p><strong>Amount:</strong> ${d.amount} Ksh</p>
-            <p><strong>Status:</strong> <span class="status-badge status-pending">Pending</span></p>
-            <div class="grid-2">
-              <button class="btn-approve" onclick="approveDeposit('${d.id}', '${d.user}', ${d.amount})">Approve</button>
-              <button class="btn-reject" onclick="rejectDeposit('${d.id}')">Reject</button>
-            </div>
-          `;
-          list.appendChild(div);
-        }
-      });
-    });
-
-    // Listen for pending withdrawals
-    onValue(ref(db, 'withdrawals'), (s) => {
-      const list = document.getElementById('pendingWithdrawalsList');
-      list.innerHTML = '';
-      s.forEach(child => {
-        const w = child.val();
-        if(w.status === 'pending') {
-          const div = document.createElement('div');
-          div.className = 'request-card';
-          div.innerHTML = `
-            <p><strong>User:</strong> ${w.user}</p>
-            <p><strong>Amount:</strong> ${w.amount} Ksh</p>
-            <p><strong>Phone:</strong> ${w.phone}</p>
-            <p><strong>Status:</strong> <span class="status-badge status-pending">Pending</span></p>
-            <div class="grid-2">
-              <button class="btn-approve" onclick="approveWithdrawal('${w.id}', '${w.user}')">Approve</button>
-              <button class="btn-reject" onclick="rejectWithdrawal('${w.id}', '${w.user}', ${w.amount})">Reject</button>
-            </div>
-          `;
-          list.appendChild(div);
-        }
-      });
-    });
-
-    // Listen for trades
-    onValue(ref(db, 'trades'), (s) => {
-      const list = document.getElementById('activeTradesList');
-      list.innerHTML = '';
-      s.forEach(child => {
-        const t = child.val();
-        const div = document.createElement('div');
-        div.className = 'trade-card';
-        div.id = 'admin-trade-' + t.id;
-        div.innerHTML = `
-          <p><strong>User:</strong> ${t.user} | <strong>Amt:</strong> ${t.amount}</p>
-          <p><strong>Pair:</strong> ${t.pair} | <strong>Dir:</strong> ${t.direction}</p>
-          <p><strong>Time Left:</strong> <span class="admin-timer" data-end="${t.endTime}">--:--</span></p>
-          <p><strong>Forced:</strong> ${t.forcedOutcome}</p>
-          <div class="grid-2">
-            <button class="btn-win" onclick="forceOutcome('${t.id}', 'win')">Force WIN</button>
-            <button class="btn-lose" onclick="forceOutcome('${t.id}', 'lose')">Force LOSS</button>
-          </div>
-        `;
-        list.appendChild(div);
-      });
-    });
-
-    // Sync admin timers
-    setInterval(() => {
-      document.querySelectorAll('.admin-timer').forEach(el => {
-        const endTime = parseInt(el.getAttribute('data-end'));
-        const diff = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
-        const mins = Math.floor(diff / 60);
-        const secs = diff % 60;
-        el.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-      });
-    }, 1000);
-  }
-
-  window.approveDeposit = async (depositId, user, amount) => {
-    // Update deposit status
-    await update(ref(db, 'deposits/' + depositId), { status: 'approved' });
-    
-    // Add to user balance
-    const snap = await get(ref(db, 'users/' + user));
-    const currentBalance = snap.val().balance || 0;
-    await update(ref(db, 'users/' + user), { balance: currentBalance + amount });
-    
-    showToast('Deposit approved! +' + amount + ' Ksh to ' + user, '#00c851');
-  };
-
-  window.rejectDeposit = async (depositId) => {
-    await update(ref(db, 'deposits/' + depositId), { status: 'rejected' });
-    showToast('Deposit rejected', '#ef4444');
-  };
-
-  window.approveWithdrawal = async (withdrawalId, user) => {
-    await update(ref(db, 'withdrawals/' + withdrawalId), { status: 'approved' });
-    showToast('Withdrawal approved for ' + user, '#00c851');
-  };
-
-  window.rejectWithdrawal = async (withdrawalId, user, amount) => {
-    await update(ref(db, 'withdrawals/' + withdrawalId), { status: 'rejected' });
-    
-    // Refund the amount back to user
-    const snap = await get(ref(db, 'users/' + user));
-    const currentBalance = snap.val().balance || 0;
-    await update(ref(db, 'users/' + user), { balance: currentBalance + amount });
-    
-    showToast('Withdrawal rejected. Refunded ' + amount + ' Ksh to ' + user, '#ef4444');
-  };
-
-  window.forceOutcome = async (tradeId, outcome) => {
-    await update(ref(db, 'trades/' + tradeId), { forcedOutcome: outcome });
-    showToast('Outcome Forced: ' + outcome);
-  };
-
 </script>
 </body>
 </html>

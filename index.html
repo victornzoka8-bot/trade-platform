@@ -20,21 +20,16 @@
       --candle-red: #ef4444;
     }
     body { background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 40px; overflow-x: hidden; }
-    .banner-demo { background: linear-gradient(90deg, #6a5acd, #483d8b); color: #fff; padding: 12px; font-weight: 600; text-align: center; font-size: 13px; position: sticky; top: 0; z-index: 10; }
-    .banner-real { background: linear-gradient(90deg, #00c851, #00803f); color: #fff; padding: 12px; font-weight: 600; text-align: center; font-size: 13px; position: sticky; top: 0; z-index: 10; }
     .container { max-width: 500px; margin: 15px auto; padding: 0 12px; }
     .hidden { display: none!important; }
     .visible { display: block!important; }
     .card { background: var(--card); border-radius: 14px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); }
-    .card.demo { border-color: #6a5acd50; }
-    .card.real { border-color: #00c85150; }
     .card.admin { border-color: var(--admin); }
     .balance-display { font-size: 42px; font-weight: 700; text-align: center; margin: 10px 0; }
     .balance-display.demo { color: var(--demo); }
     .balance-display.real { color: var(--real); }
     .price-row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; font-size: 16px; }
     .timer { font-size: 24px; font-weight: 700; text-align: center; color: #fbbf24; margin: 10px 0; }
-    .timer.ended { color: #22c55e; }
     input, select { width: 100%; padding: 12px 14px; margin: 8px 0; border-radius: 10px; border: 1px solid var(--border); background: var(--input); color: var(--text); font-size: 15px; }
     button { width: 100%; padding: 13px; margin: 8px 0; border-radius: 10px; border: none; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.2s; }
     button:hover { opacity: 0.9; }
@@ -46,48 +41,30 @@
     .btn-gray { background: #475569; color: #fff; }
     .btn-admin { background: var(--admin); color: #fff; }
     .btn-approve { background: #10b981; color: #fff; }
-    .btn-reject { background: #ef4444; color: #fff; }
-    .btn-win { background: #22c55e; color: #fff; }
-    .btn-lose { background: #ef4444; color: #fff; }
-    .btn-withdraw { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+    .btn-win { background: #22c55e; color: #fff; padding: 8px; margin: 4px 0; }
+    .btn-lose { background: #ef4444; color: #fff; padding: 8px; margin: 4px 0; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
     .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0; }
     .stat-box { background: var(--input); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
     .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
     .stat-value { font-size: 16px; font-weight: 700; }
     .chart-box { height: 320px; background: var(--input); border-radius: 10px; border: 1px solid var(--border); margin: 12px 0; padding: 8px; position: relative; overflow: hidden; }
     canvas { width: 100%; height: 100%; background: transparent; }
-    .chart-axis { position: absolute; font-size: 10px; color: var(--muted); pointer-events: none; }
-    .chart-axis.y { left: 4px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-between; }
     .history-box { max-height: 200px; overflow-y: auto; margin-top: 10px; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th { background: var(--input); color: var(--muted); padding: 8px; text-align: left; border-bottom: 1px solid var(--border); }
     td { padding: 8px; border-bottom: 1px solid var(--border); }
     .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 14px; z-index: 100000; display: none; }
     
-    /* Menu Styles */
     #sideMenu { position:fixed; top:0; left:-280px; width:280px; height:100vh; background:var(--card); border-right:1px solid var(--border); z-index:10000; transition:0.3s; overflow-y:auto; }
     #sideMenu.open { left:0; }
     #menuOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; display:none; }
     #menuOverlay.show { display:block; }
-    .menu-header { display:flex; justify-content:space-between; align-items:center; padding:12px; color:var(--muted); font-size:14px; cursor:pointer; border-radius:8px; }
-    .menu-header:hover { background:var(--input); }
-    .submenu { display:none; padding-left:20px; }
-    .submenu.show { display:block; }
     .menu-item { padding:12px; border-radius:8px; margin:4px 0; cursor:pointer; font-size:14px; display:flex; align-items:center; gap:10px; }
     .menu-item:hover { background:var(--input); }
-    .switch { position:relative; display:inline-block; width:46px; height:24px; }
-    .switch input { opacity:0; width:0; height:0; }
-    .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#475569; transition:.3s; border-radius:24px; }
-    .slider:before { position:absolute; content:""; height:18px; width:18px; left:3px; bottom:3px; background:white; transition:.3s; border-radius:50%; }
-    input:checked + .slider { background:#00c851; }
-    input:checked + .slider:before { transform:translateX(22px); }
-
-    /* Popups */
     .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 20000; backdrop-filter: blur(4px); }
     .popup-content { background: var(--card); border-radius: 14px; padding: 24px; width: 90%; max-width: 360px; border: 1px solid var(--border); }
-    .mpesa-box { background: #008800; color: #fff; border-radius: 12px; padding: 16px; margin: 10px 0; line-height: 1.5; text-align: center; }
+    .trade-card { background: var(--input); border: 1px solid var(--border); padding: 12px; border-radius: 10px; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -95,53 +72,21 @@
 <div id="toast" class="toast"></div>
 <div id="menuOverlay" onclick="closeMenu()"></div>
 
-<!-- SIDE MENU -->
 <div id="sideMenu">
   <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid var(--border);">
     <h3 id="menuUser">Menu</h3>
-    <button onclick="closeMenu()" style="background:none; border:none; font-size:24px; color:var(--muted); cursor:pointer;">×</button>
+    <button onclick="closeMenu()" style="background:none; border:none; font-size:24px; color:var(--muted); cursor:pointer;">脳</button>
   </div>
-  
   <div style="padding:12px;">
-    <!-- Account Settings -->
-    <div style="margin-bottom:8px;">
-      <div class="menu-header" onclick="toggleSubMenu('accountSettings')">
-        <span>⚙️ Account settings</span>
-        <span id="accountSettingsArrow">▼</span>
-      </div>
-      <div id="accountSettings" class="submenu">
-        <div class="menu-item" onclick="openSettingPopup('name')">✏️ Change Name</div>
-        <div class="menu-item" onclick="openSettingPopup('password')">🔒 Change Password</div>
-        <div class="menu-item" style="justify-content:space-between;">
-          <span>📱 2FA Auth</span>
-          <label class="switch"><input type="checkbox" id="twoFactorToggle" onchange="toggle2FA()"><span class="slider"></span></label>
-        </div>
-        <div class="menu-item" onclick="verifyIdentity()">👤 Verify Identity <span id="verifyStatus" style="font-size:10px; background:#f59e0b; padding:2px 4px; border-radius:4px;">Pending</span></div>
-      </div>
-    </div>
-
-    <!-- Navigation -->
-    <div class="menu-item" onclick="backToTrade()">📈 Live Chart</div>
-    <div class="menu-item" onclick="openDeposit()">⬇️ Deposit</div>
-    <div class="menu-item" onclick="openWithdraw()">⬆️ Withdraw</div>
-    <div class="menu-item" onclick="openHistory()">🕐 History</div>
-    <div class="menu-item" onclick="openHelp()">❓ Help Center</div>
-    
-    <hr style="margin:12px 0; border-color:var(--border);">
-    
-    <!-- Admin Portal -->
-    <div class="menu-item" style="color:var(--admin);" onclick="openAdminLogin()">🛡️ Admin Portal</div>
-    
-    <div class="menu-item" style="justify-content:space-between;">
-      <span>🌙 Dark theme</span>
-      <label class="switch"><input type="checkbox" id="themeToggle" checked><span class="slider"></span></label>
-    </div>
-    
+    <div class="menu-item" onclick="backToTrade()">馃搱 Live Chart</div>
+    <div class="menu-item" onclick="openDeposit()">猬囷笍 Deposit</div>
+    <div class="menu-item" onclick="openWithdraw()">猬嗭笍 Withdraw</div>
+    <div class="menu-item" onclick="openHistory()">馃晲 History</div>
+    <div class="menu-item" style="color:var(--admin);" onclick="openAdminLogin()">馃洝锔� Admin Portal</div>
     <button class="btn-gray" onclick="logout()" style="margin-top:20px;">Logout</button>
   </div>
 </div>
 
-<!-- PAGES -->
 <div id="loginPage" class="container visible">
   <div class="card" style="margin-top:60px;">
     <h2 style="text-align:center; margin-bottom:20px;">Ikuthu Trade</h2>
@@ -149,79 +94,43 @@
     <input id="password" placeholder="Password" type="password">
     <button class="btn-blue" onclick="register()">Register</button>
     <button class="btn-gray" onclick="login()">Login</button>
-    <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px;">Start trading with Ksh 100</p>
   </div>
 </div>
 
 <div id="accountPage" class="container hidden">
   <div class="card">
     <h2 style="text-align:center; margin-bottom:20px;">Welcome, <span id="userNameDisplay"></span></h2>
-    <button class="btn-demo" onclick="selectAccount('demo')"><h3>💎 Demo Account</h3><p style="font-size:13px; opacity:0.9;">10,000 Ksh (Virtual)</p></button>
-    <button class="btn-real" onclick="selectAccount('real')" style="margin-top:10px;"><h3>💼 Real Account</h3><p style="font-size:13px; opacity:0.9;">Balance: <span id="realBalance">0</span> Ksh</p></button>
+    <button class="btn-demo" onclick="selectAccount('demo')"><h3>馃拵 Demo Account</h3><p style="font-size:13px; opacity:0.9;">10,000 Ksh (Virtual)</p></button>
+    <button class="btn-real" onclick="selectAccount('real')" style="margin-top:10px;"><h3>馃捈 Real Account</h3><p style="font-size:13px; opacity:0.9;">Balance: <span id="realBalance">0</span> Ksh</p></button>
   </div>
 </div>
 
 <div id="tradePage" class="container hidden">
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-    <button onclick="openMenu()" style="width:44px; height:44px; background:var(--card); border:1px solid var(--border); border-radius:10px; font-size:20px;">☰</button>
+    <button onclick="openMenu()" style="width:44px; height:44px; background:var(--card); border:1px solid var(--border); border-radius:10px; font-size:20px;">鈽�</button>
     <h3 id="accTitle">Demo Account</h3>
     <button class="btn-gray" style="width:auto; padding:6px 12px; font-size:12px;" onclick="backToAccounts()">Switch</button>
   </div>
 
   <div id="balanceDisplay" class="balance-display demo">10,000 Ksh</div>
-  <div class="grid-4">
-    <div class="stat-box"><div class="stat-label">Win Rate</div><div class="stat-value" id="winRate">0%</div></div>
-    <div class="stat-box"><div class="stat-label">Trades</div><div class="stat-value" id="totalTrades">0</div></div>
-    <div class="stat-box"><div class="stat-label">Profit</div><div class="stat-value" id="netPnL">0</div></div>
-    <div class="stat-box"><div class="stat-label">Best</div><div class="stat-value" id="bestTrade">0</div></div>
-  </div>
-
+  
   <div class="price-row"><span id="pairName">EUR/USD</span><span id="price">1.1273</span></div>
-  <div id="timer" class="timer">Ready</div>
+  <div id="timerDisplay" class="timer">Ready</div>
   
   <div class="grid-2">
-    <select id="pairSelect" onchange="changePair()"><option value="EURUSD">EUR/USD</option><option value="GBPUSD">GBP/USD</option><option value="GOLD">GOLD</option></select>
-    <select id="durationSelect"><option value="30">30 Sec</option><option value="60" selected>1 Min</option></select>
+    <select id="pairSelect"><option value="EURUSD">EUR/USD</option><option value="GBPUSD">GBP/USD</option></select>
+    <select id="durationSelect">
+      <option value="60">1 Min</option>
+      <option value="300">5 Min</option>
+      <option value="900">15 Min</option>
+      <option value="1800">30 Min</option>
+      <option value="3600">1 Hour</option>
+    </select>
   </div>
 
-  <div class="chart-box"><canvas id="chartCanvas"></canvas><div class="chart-axis y" id="yAxis"></div></div>
+  <div class="chart-box"><canvas id="chartCanvas"></canvas></div>
   <input id="tradeAmount" type="number" placeholder="Amount Ksh" value="100">
-  <div class="grid-2"><button class="btn-higher" onclick="placeTrade('higher')">HIGHER 📈</button><button class="btn-lower" onclick="placeTrade('lower')">LOWER 📉</button></div>
-</div>
-
-<!-- MODALS & POPUPS -->
-<div id="settingPopup" class="popup">
-  <div class="popup-content">
-    <h3 id="settingTitle">Update</h3>
-    <input id="settingInput" type="text" placeholder="Enter new value">
-    <div class="grid-2">
-      <button class="btn-blue" onclick="saveSetting()">Save</button>
-      <button class="btn-gray" onclick="closePopup()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<div id="depositPage" class="container hidden">
-  <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <h3>⬇️ Deposit Funds</h3>
-      <button class="btn-gray" style="width:auto; padding:6px 12px;" onclick="backToTrade()">← Back</button>
-    </div>
-    <div class="mpesa-box"><p>Send to M-Pesa Till/Number:</p><p style="font-size:22px; font-weight:bold;">0758903057</p></div>
-    <input id="depositAmount" type="number" placeholder="Amount to deposit">
-    <button class="btn-blue" onclick="requestDeposit()">Confirm Payment</button>
-  </div>
-</div>
-
-<div id="withdrawPage" class="container hidden">
-  <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <h3>⬆️ Withdraw Funds</h3>
-      <button class="btn-gray" style="width:auto; padding:6px 12px;" onclick="backToTrade()">← Back</button>
-    </div>
-    <input id="withdrawAmount" type="number" placeholder="Amount (Min 100 Ksh)">
-    <button class="btn-withdraw" onclick="requestWithdraw()">Withdraw to M-Pesa</button>
-  </div>
+  <div class="grid-2"><button class="btn-higher" id="btnHigher" onclick="placeTrade('higher')">HIGHER 馃搱</button><button class="btn-lower" id="btnLower" onclick="placeTrade('lower')">LOWER 馃搲</button></div>
 </div>
 
 <div id="adminLoginPage" class="popup">
@@ -236,34 +145,32 @@
 
 <div id="adminPage" class="container hidden">
   <div class="card admin">
-    <h2>🛡️ Admin Panel</h2>
-    <div id="pendingList" style="margin-top:15px;"></div>
+    <h2>馃洝锔� Admin Panel</h2>
+    <div style="margin-top:20px;">
+      <h3>Live Trades</h3>
+      <div id="activeTradesList" style="margin-top:10px;"></div>
+    </div>
+    <div style="margin-top:20px;">
+      <h3>Pending Requests</h3>
+      <div id="pendingList" style="margin-top:10px;"></div>
+    </div>
     <button class="btn-gray" onclick="backToTrade()">Exit Admin</button>
-  </div>
-</div>
-
-<div id="helpPage" class="popup">
-  <div class="popup-content">
-    <h3>Help Center</h3>
-    <p style="font-size:14px; margin:10px 0;">Contact Support: <strong>support@ikuthu.com</strong></p>
-    <p style="font-size:14px;">WhatsApp: <strong>+254 758 903 057</strong></p>
-    <button class="btn-blue" style="margin-top:15px;" onclick="closePopup()">Close</button>
   </div>
 </div>
 
 <div id="historyPage" class="container hidden">
   <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center;">
-      <h3>🕐 Trade History</h3>
-      <button class="btn-gray" style="width:auto; padding:6px 12px;" onclick="backToTrade()">← Back</button>
+      <h3>馃晲 Trade History</h3>
+      <button class="btn-gray" style="width:auto; padding:6px 12px;" onclick="backToTrade()">鈫� Back</button>
     </div>
-    <div class="history-box"><table id="historyTable"><thead><tr><th>Pair</th><th>Result</th><th>Profit</th></tr></thead><tbody id="historyBody"></tbody></table></div>
+    <div class="history-box"><table><thead><tr><th>Pair</th><th>Result</th><th>Profit</th></tr></thead><tbody id="historyBody"></tbody></table></div>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, set, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import { getDatabase, ref, set, push, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDaXirG5AdywTiJ54z7Em4tE1X2sSRB8Sg",
@@ -282,11 +189,10 @@
   let accountType = 'demo';
   let balance = 10000;
   let price = 1.1273;
-  let chartCtx, chartCanvas;
   let candles = [];
-  let currentSettingType = '';
+  let chartCtx, chartCanvas;
+  let activeTradeInterval = null;
 
-  // UI HELPERS
   window.showToast = (msg, color='#222') => {
     const t = document.getElementById('toast');
     t.textContent = msg; t.style.background = color; t.style.display = 'block';
@@ -295,17 +201,15 @@
 
   window.openMenu = () => { document.getElementById('sideMenu').classList.add('open'); document.getElementById('menuOverlay').classList.add('show'); };
   window.closeMenu = () => { document.getElementById('sideMenu').classList.remove('open'); document.getElementById('menuOverlay').classList.remove('show'); };
-  window.toggleSubMenu = (id) => { const el = document.getElementById(id); el.classList.toggle('show'); };
   window.closePopup = () => { document.querySelectorAll('.popup').forEach(p => p.style.display = 'none'); };
 
-  // AUTH
   window.register = async () => {
     const u = document.getElementById('username').value.trim();
     const p = document.getElementById('password').value.trim();
     if(!u || !p) return showToast('Enter details');
     const snap = await get(ref(db, 'users/' + u));
     if(snap.exists()) return showToast('Exists');
-    await set(ref(db, 'users/' + u), {password:p, balance:0, verified:false, twoFactor:false, name:u});
+    await set(ref(db, 'users/' + u), {password:p, balance:0, name:u});
     showToast('Success!', '#00c851');
   };
 
@@ -319,22 +223,15 @@
     document.getElementById('accountPage').className = 'visible';
     document.getElementById('userNameDisplay').textContent = u;
     document.getElementById('menuUser').textContent = u;
-    // Load settings
-    const user = snap.val();
-    document.getElementById('twoFactorToggle').checked = user.twoFactor || false;
-    document.getElementById('verifyStatus').textContent = user.verified ? 'Verified' : 'Pending';
-    document.getElementById('verifyStatus').style.background = user.verified ? '#00c851' : '#f59e0b';
   };
 
   window.logout = () => location.reload();
 
-  // ACCOUNT SELECTION
   window.selectAccount = (type) => {
     accountType = type;
     if(type === 'real') {
       onValue(ref(db, 'users/' + currentUser + '/balance'), (s) => {
         balance = s.val() || 0;
-        document.getElementById('realBalance').textContent = balance;
         updateBalanceUI();
       });
     } else {
@@ -351,51 +248,18 @@
   function updateBalanceUI() {
     document.getElementById('balanceDisplay').textContent = balance.toLocaleString() + ' Ksh';
     document.getElementById('balanceDisplay').className = 'balance-display ' + accountType;
+    if(currentUser) update(ref(db, 'users/' + currentUser), {balance});
   }
 
-  // SETTINGS
-  window.openSettingPopup = (type) => {
-    currentSettingType = type;
-    document.getElementById('settingTitle').textContent = 'Update ' + type;
-    document.getElementById('settingPopup').style.display = 'flex';
-  };
-
-  window.saveSetting = async () => {
-    const val = document.getElementById('settingInput').value;
-    if(!val) return;
-    await update(ref(db, 'users/' + currentUser), { [currentSettingType]: val });
-    showToast('Updated', '#00c851');
-    closePopup();
-  };
-
-  window.toggle2FA = async () => {
-    const val = document.getElementById('twoFactorToggle').checked;
-    await update(ref(db, 'users/' + currentUser), { twoFactor: val });
-    showToast('2FA ' + (val ? 'Enabled' : 'Disabled'));
-  };
-
-  window.verifyIdentity = () => {
-    showToast('Verification request sent');
-    document.getElementById('verifyStatus').textContent = 'Reviewing...';
-  };
-
-  // NAVIGATION
   window.backToTrade = () => {
     closeMenu();
     document.querySelectorAll('.container').forEach(c => c.className = 'container hidden');
     document.getElementById('tradePage').className = 'container visible';
   };
-  window.openDeposit = () => { closeMenu(); document.getElementById('tradePage').className = 'hidden'; document.getElementById('depositPage').className = 'visible'; };
-  window.openWithdraw = () => { 
-    if(accountType !== 'real') return showToast('Real Account only');
-    closeMenu(); document.getElementById('tradePage').className = 'hidden'; document.getElementById('withdrawPage').className = 'visible'; 
-  };
-  window.openHistory = () => { closeMenu(); document.getElementById('tradePage').className = 'hidden'; document.getElementById('historyPage').className = 'visible'; loadHistory(); };
-  window.openHelp = () => { closeMenu(); document.getElementById('helpPage').style.display = 'flex'; };
+
   window.openAdminLogin = () => { closeMenu(); document.getElementById('adminLoginPage').style.display = 'flex'; };
   window.backToAccounts = () => { document.getElementById('tradePage').className = 'hidden'; document.getElementById('accountPage').className = 'visible'; };
 
-  // TRADING LOGIC
   function initChart() {
     chartCanvas = document.getElementById('chartCanvas');
     chartCtx = chartCanvas.getContext('2d');
@@ -425,7 +289,6 @@
     const maxP = Math.max(...candles.map(c => c.h));
     const minP = Math.min(...candles.map(c => c.l));
     const range = maxP - minP;
-    
     candles.forEach((c, i) => {
       const x = i * w;
       const yO = (1 - (c.o - minP) / range) * chartCanvas.height;
@@ -435,64 +298,87 @@
     });
   }
 
-  window.placeTrade = (dir) => {
+  window.placeTrade = async (dir) => {
     const amt = parseFloat(document.getElementById('tradeAmount').value);
+    const duration = parseInt(document.getElementById('durationSelect').value);
     if(amt > balance) return showToast('Insufficient funds');
+    
     balance -= amt;
     updateBalanceUI();
-    showToast('Trade Placed: ' + dir, '#f59e0b');
-    // Simulate result
-    setTimeout(() => {
-      const win = Math.random() > 0.5;
-      if(win) {
-        const profit = amt * 1.8;
-        balance += profit;
-        showToast('WIN: +' + profit, '#00c851');
-      } else {
-        showToast('LOSS', '#ef4444');
-      }
-      updateBalanceUI();
-      saveHistory(dir, win ? amt * 0.8 : -amt);
-    }, 5000);
+    
+    const tradeId = push(ref(db, 'trades')).key;
+    const endTime = Date.now() + (duration * 1000);
+    
+    const tradeData = {
+      id: tradeId,
+      user: currentUser,
+      amount: amt,
+      direction: dir,
+      endTime: endTime,
+      pair: document.getElementById('pairSelect').value,
+      status: 'pending',
+      forcedOutcome: 'none',
+      accountType: accountType
+    };
+    
+    await set(ref(db, 'trades/' + tradeId), tradeData);
+    startCountdown(tradeId, endTime);
+    
+    document.getElementById('btnHigher').disabled = true;
+    document.getElementById('btnLower').disabled = true;
   };
 
-  function saveHistory(dir, profit) {
-    const h = { pair: document.getElementById('pairSelect').value, profit, time: new Date().toLocaleTimeString() };
+  function startCountdown(tradeId, endTime) {
+    if(activeTradeInterval) clearInterval(activeTradeInterval);
+    
+    activeTradeInterval = setInterval(async () => {
+      const now = Date.now();
+      const diff = Math.max(0, Math.floor((endTime - now) / 1000));
+      
+      const mins = Math.floor(diff / 60);
+      const secs = diff % 60;
+      document.getElementById('timerDisplay').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      
+      if(diff <= 0) {
+        clearInterval(activeTradeInterval);
+        concludeTrade(tradeId);
+      }
+    }, 1000);
+  }
+
+  async function concludeTrade(tradeId) {
+    const snap = await get(ref(db, 'trades/' + tradeId));
+    if(!snap.exists()) return;
+    const trade = snap.val();
+    
+    let win = false;
+    if(trade.forcedOutcome === 'win') win = true;
+    else if(trade.forcedOutcome === 'lose') win = false;
+    else win = Math.random() > 0.5;
+    
+    if(win) {
+      const profit = trade.amount * 1.8;
+      balance += profit;
+      showToast('WIN: +' + profit, '#00c851');
+    } else {
+      showToast('LOSS', '#ef4444');
+    }
+    
+    updateBalanceUI();
+    saveHistory(trade.pair, win ? trade.amount * 0.8 : -trade.amount);
+    
+    document.getElementById('timerDisplay').textContent = 'Ready';
+    document.getElementById('btnHigher').disabled = false;
+    document.getElementById('btnLower').disabled = false;
+    
+    await remove(ref(db, 'trades/' + tradeId));
+  }
+
+  function saveHistory(pair, profit) {
+    const h = { pair, profit, time: new Date().toLocaleTimeString() };
     if(accountType === 'real') push(ref(db, 'users/' + currentUser + '/history'), h);
   }
 
-  function loadHistory() {
-    const body = document.getElementById('historyBody');
-    body.innerHTML = '';
-    if(accountType === 'demo') return body.innerHTML = '<tr><td colspan="3">History only for Real Account</td></tr>';
-    onValue(ref(db, 'users/' + currentUser + '/history'), (s) => {
-      s.forEach(child => {
-        const v = child.val();
-        body.innerHTML += `<tr><td>${v.pair}</td><td style="color:${v.profit>0?'#00c851':'#ef4444'}">${v.profit>0?'WIN':'LOSS'}</td><td>${v.profit}</td></tr>`;
-      });
-    });
-  }
-
-  // DEPOSIT / WITHDRAW
-  window.requestDeposit = async () => {
-    const amt = document.getElementById('depositAmount').value;
-    if(!amt) return;
-    await push(ref(db, 'requests'), {user: currentUser, amount: amt, type: 'deposit', status: 'pending'});
-    showToast('Request Sent. Waiting for approval.');
-    backToTrade();
-  };
-
-  window.requestWithdraw = async () => {
-    const amt = document.getElementById('withdrawAmount').value;
-    if(amt > balance) return showToast('Insufficient');
-    await push(ref(db, 'requests'), {user: currentUser, amount: amt, type: 'withdraw', status: 'pending'});
-    balance -= amt;
-    await update(ref(db, 'users/' + currentUser), {balance});
-    showToast('Withdrawal request received');
-    backToTrade();
-  };
-
-  // ADMIN
   window.adminLogin = () => {
     const u = document.getElementById('adminUser').value;
     const p = document.getElementById('adminPass').value;
@@ -505,30 +391,44 @@
   };
 
   function loadAdminPanel() {
-    onValue(ref(db, 'requests'), (s) => {
-      const list = document.getElementById('pendingList');
+    // Listen for trades
+    onValue(ref(db, 'trades'), (s) => {
+      const list = document.getElementById('activeTradesList');
       list.innerHTML = '';
       s.forEach(child => {
-        const r = child.val();
-        if(r.status === 'pending') {
-          const div = document.createElement('div');
-          div.className = 'card';
-          div.innerHTML = `<p>${r.user}: ${r.amount} (${r.type})</p>
-            <button class="btn-approve" onclick="approveReq('${child.key}', '${r.user}', ${r.amount}, '${r.type}')">Approve</button>`;
-          list.appendChild(div);
-        }
+        const t = child.val();
+        const div = document.createElement('div');
+        div.className = 'trade-card';
+        div.id = 'admin-trade-' + t.id;
+        div.innerHTML = `
+          <p><strong>User:</strong> ${t.user} | <strong>Amt:</strong> ${t.amount}</p>
+          <p><strong>Pair:</strong> ${t.pair} | <strong>Dir:</strong> ${t.direction}</p>
+          <p><strong>Time Left:</strong> <span class="admin-timer" data-end="${t.endTime}">--:--</span></p>
+          <p><strong>Forced:</strong> ${t.forcedOutcome}</p>
+          <div class="grid-2">
+            <button class="btn-win" onclick="forceOutcome('${t.id}', 'win')">Force WIN</button>
+            <button class="btn-lose" onclick="forceOutcome('${t.id}', 'lose')">Force LOSS</button>
+          </div>
+        `;
+        list.appendChild(div);
       });
     });
+
+    // Sync admin timers
+    setInterval(() => {
+      document.querySelectorAll('.admin-timer').forEach(el => {
+        const endTime = parseInt(el.getAttribute('data-end'));
+        const diff = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+        const mins = Math.floor(diff / 60);
+        const secs = diff % 60;
+        el.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      });
+    }, 1000);
   }
 
-  window.approveReq = async (id, user, amt, type) => {
-    if(type === 'deposit') {
-      const snap = await get(ref(db, 'users/' + user + '/balance'));
-      const newBal = (snap.val() || 0) + parseFloat(amt);
-      await update(ref(db, 'users/' + user), {balance: newBal});
-    }
-    await update(ref(db, 'requests/' + id), {status: 'approved'});
-    showToast('Approved');
+  window.forceOutcome = async (tradeId, outcome) => {
+    await update(ref(db, 'trades/' + tradeId), { forcedOutcome: outcome });
+    showToast('Outcome Forced: ' + outcome);
   };
 
 </script>
